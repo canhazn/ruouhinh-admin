@@ -1,0 +1,13 @@
+.bar {
+    margin-top: 10px;
+}
+
+.gara_item {
+    margin: 25px 15px;    
+}
+
+.google_formatted_address {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

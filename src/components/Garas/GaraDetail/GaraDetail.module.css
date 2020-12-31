@@ -1,0 +1,28 @@
+.contact {
+    margin: 50px 0;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.google_place_detail {
+    padding: 0;
+}
+
+.google_place_detail li {
+    display: flex;
+    align-items: center;
+    margin: 15px; 
+}
+
+.google_place_detail li svg {
+    margin-right: 10px;
+}
+
+.google_formatted_address {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
