@@ -4,24 +4,20 @@ import { Link } from 'react-router-dom';
 class TopNav extends React.Component {
     render() {
         return (
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="#">Navbar</a>
-                    
-                    <div class="mr-0" id="navbarNav">
-                        <ul class="navbar-nav">
-                            <li class="nav-item">
-                                <Link class="nav-link" to="/">Home</Link>
+            <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+                <div className="container-fluid">                    
+                    <Link className="navbar-brand" to="/">Home</Link>
+                    <div className="mr-0" id="navbarNav">
+                        <ul className="navbar-nav">
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/">Home</Link>
                             </li>
-                            <li class="nav-item">
-                                <Link class="nav-link"  to="/xuat/">Xuất</Link>
+                            <li className="nav-item">
+                                <Link className="nav-link"  to="/xuat/">Xuất</Link>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Pricing</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-                            </li>
+                            <li className="nav-item">
+                                <a className="nav-link" href="/material/">Nhập</a>
+                            </li>                           
                         </ul>
                     </div>
                 </div>

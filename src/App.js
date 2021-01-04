@@ -3,10 +3,7 @@ import './App.css';
 import { Container } from './components';
 
 export class App extends Component {
-  constructor(props) {
-    super(props);
 
-  }
   render() {
     return (
       <div>        

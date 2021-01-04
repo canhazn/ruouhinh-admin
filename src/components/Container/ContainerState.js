@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ContainerContext, { defaultLocation } from './ContainerContext';
+import ContainerContext from './ContainerContext';
 
 
 
