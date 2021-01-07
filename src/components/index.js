@@ -1,4 +1,5 @@
 import Container from './Container/Container';
+import { Login, Logout } from "./Auth";
 import TopNav from './TopNav/TopNav';
 import Home from './Home/Home';
 import Product from './Product/Product';
@@ -9,5 +10,8 @@ export {
     TopNav,
     Home,
     Material,
-    Product
+    Product,
+
+    Login,
+    Logout,
 };
