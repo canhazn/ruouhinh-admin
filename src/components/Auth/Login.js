@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import axiosInstance from '../../Axios';
 import { useHistory } from 'react-router-dom';
-
+import { authService } from './authService';
 
 
 export default function Login() {
     const history = useHistory();
     const initialFormData = Object.freeze({
-        username: '',
+        email: '',
         password: '',
     });
 
@@ -24,20 +24,10 @@ export default function Login() {
         e.preventDefault();
         console.log(formData);
 
-        axiosInstance
-            .post(`token/`, {
-                username: formData.username,
-                password: formData.password,
-            })
-            .then((res) => {
-                localStorage.setItem('access_token', res.data.access);
-                localStorage.setItem('refresh_token', res.data.refresh);
-                axiosInstance.defaults.headers['Authorization'] =
-                    'JWT ' + localStorage.getItem('access_token');
-                history.push('/');
-                //console.log(res);
-                //console.log(res.data);
-            });
+        authService.login(formData.email, formData.password).then( res => {
+            history.push('/');
+        })
+                
     };
 
     return (
@@ -45,9 +35,9 @@ export default function Login() {
             <form>
                 <input
                     required
-                    id="username"
-                    placeholder="Username"
-                    name="username"
+                    id="email"
+                    placeholder="email"
+                    name="email"
                     onChange={handleChange}
                 />
                 <input
