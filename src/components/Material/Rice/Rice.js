@@ -1,34 +1,60 @@
-import React, { Component } from 'react';
+import React, { useState , Component } from 'react';
 import { config } from '../../../Constant';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
+import axiosInstance from "../../../Axios";
+import styles from "./Rice.module.css";
 
+function NumberFormatCustom(props) {
+  const { inputRef, onChange, ...other } = props;
+
+  return (
+    <NumberFormat
+      {...other}
+      getInputRef={inputRef}
+
+      onValueChange={values => {
+        onChange({
+          target: {
+            // cái target này sẽ được chuyền qua onChange
+            // nên nó cần có cả name và value để setState đọc
+            name: "total_cost",
+            value: values.value
+          },
+        });
+      }}
+      thousandSeparator
+      suffix=" đ"
+    />
+  );
+}
+
+
+const initForm = {
+  quantity: "",
+  total_cost: "",
+  material: 1 // rice material id = 1
+};
 
 
 function ListItems(props) {
   let receipts = props.receipts;
 
-  let listReceipts = receipts.map(receipt => {
+  let listReceipts = receipts.map((receipt, index) => {
     return (
-      <li className="list-group-item" key={receipt.id}>
-        <p>{receipt.factory.title}</p>
-
-        <span className="mx-2">
-          <Moment format="DD-MM-YYYY">
-            {receipt.date_created}
-          </Moment>
-        </span>
-
-        <span className="mx-2">{receipt.quantity} bao</span>
-        <NumberFormat value={receipt.total_cost} displayType={'text'} thousandSeparator={true} suffix=" đ" />
-      </li>
+      <tr key={receipt.id}>
+        <th scope="row">{index}</th>
+        <td><Moment format="DD-MM-YYYY">{receipt.date_created}</Moment></td>
+        <td>{receipt.quantity} bao</td>
+        <td><NumberFormat value={receipt.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
+      </tr>
     )
   });
 
   return (
-    <ul className="list-group">
+    <tbody>
       {listReceipts}
-    </ul>
+    </tbody>
   )
 }
 
@@ -40,11 +66,10 @@ class Rice extends Component {
 
     this.state = {
       receipts: [],
-      form_value: {
-        quantity: 0,
-        total_cost: 0
-      }
+      form_value: initForm
     }
+
+
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -58,10 +83,13 @@ class Rice extends Component {
   }
 
   handleChange(event) {
-    const target = event.target;
-    const value = target.value;
-    const name = target.name;
+    const {name, value} = event.target
+    // const target = event.target;
+    // const value = target.value;
+    // const name = target.name;
 
+
+    // update form data to state
     this.setState((prevState) => {
       let form_value = { ...prevState.form_value };
       form_value[name] = value;
@@ -69,20 +97,25 @@ class Rice extends Component {
     });
   }
 
-  handleSubmit(event) {    
+  handleSubmit(event) {
     event.preventDefault();
-    console.log(this.state.form_value);
+
+    // Validate data
+    if (this.state.form_value.quantity === "" || this.state.form_value.total_cost === "") {
+      return;
+    }
+
     const url = `${config.API_URL}/receipt/`;
-    fetch(url, {
-      method: "POST",
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(this.state.form_value)
-    }).then(data => {
+    let value = JSON.stringify(this.state.form_value);
+
+    axiosInstance.post(url, value).then(data => {
       console.log(data);
-    })
+      this.getList();
+      this.setState((prevState) => {
+        let form_value = initForm;
+        return { form_value };
+      });
+    });
   }
 
   componentDidMount() {
@@ -92,28 +125,43 @@ class Rice extends Component {
   render() {
     return (
       <div className="row">
+        <div className={styles.bg_custom}></div>
+
         <div className="col-md-6">
-          <p>input</p>
-
           <form onSubmit={this.handleSubmit}>
-            {/* Số bao */}
-            <div className="mb-3">
-              <label className="form-label">Số bao</label>
-              <input type="number" className="form-control" placeholder="Số bao" name="quantity" value={this.state.form_value.quantity} onChange={this.handleChange} />
+            <div className="row">
+              <div className="col-8">
+                {/* Số bao */}
+                <div className="mb-3">
+                  <input type="number" className="form-control" placeholder="Số bao" name="quantity" value={this.state.form_value.quantity} onChange={this.handleChange} required />
+                </div>
+                {/* Giá */}
+                <div className="mb-3">
+                  <NumberFormatCustom className="form-control" placeholder="Giá" name="total_cost" value={this.state.form_value.total_cost} onChange={this.handleChange} thousandSeparator={true} suffix={' đ'} required />
+                </div>
+              </div>
+              <div className="col-4">
+
+                <input type="submit" className="btn btn-primary w-100 save-btn" value="Nhập" disabled={this.state.form_value.quantity === "" || this.state.form_value.total_cost === ""} />
+              </div>
             </div>
 
-            {/* Giá */}
-            <div className="mb-3">
-              <label className="form-label">Giá</label>
-              <input type="number" className="form-control" placeholder="Giá" name="total_cost" value={this.state.form_value.total_cost} onChange={this.handleChange} />
-            </div>
-
-            <input type="submit" value="Nhập" />
           </form>
         </div>
 
         <div className="col-md-6">
-          <ListItems receipts={this.state.receipts}></ListItems>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Ngày</th>
+                <th scope="col">Số bao</th>
+                <th scope="col">Tổng tiền</th>
+              </tr>
+            </thead>
+            <ListItems receipts={this.state.receipts}></ListItems>
+
+          </table>
         </div>
       </div>
     )

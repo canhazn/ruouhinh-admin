@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axiosInstance from '../../Axios';
 import { useHistory } from 'react-router-dom';
 import { authService } from './authService';
 
