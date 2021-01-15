@@ -150,7 +150,7 @@ class Rice extends Component {
         </div>
 
         <div className="col-md-6">
-          <table class="table table-striped">
+          <table className="table table-striped">
             <thead>
               <tr>
                 <th scope="col">#</th>
