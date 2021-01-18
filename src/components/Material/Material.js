@@ -8,15 +8,7 @@ class Material extends Component {
 
   render() {
     return (
-      <div>
-        <div className="row p-3">
-          <div className="col-6 text-center">
-            <Link className="btn w-100 btn-link" to="rice">Nhập gạo</Link>
-          </div>
-          <div className="col-6 text-center">
-            <Link className="btn w-100 btn-link" to="yeast">Nhập men</Link>
-          </div>
-        </div>
+      <div className="mt-3">       
         <Switch >
           <Redirect exact from="/material" to="/material/rice" />
           <Route exact path='/material/rice' component={Rice} />

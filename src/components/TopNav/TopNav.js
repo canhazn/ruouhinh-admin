@@ -9,8 +9,8 @@ class TopNav extends React.Component {
                 <div className="container">
                     <Link className="navbar-brand" to="/">Home</Link>
                     <div className="mr-0" id="navbarNav">                            
-                                <Link className="nav-link d-inline-block" to="/xuat/">Xuất</Link>
-                                <Link className="nav-link d-inline-block" to="/material/">Nhập</Link>
+                                <Link className="nav-link d-inline-block" to="/xuat/">Xuất</Link>                                
+                                <Link className="nav-link d-inline-block" to="/material/rice">Nhập</Link>                                
                                 <Link className="nav-link d-inline-block" to="/logout/">Logout</Link>
                         {/* <ul className="navbar-nav">
                             <li className="nav-item">
