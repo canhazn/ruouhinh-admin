@@ -7,9 +7,11 @@ export default function SignUp() {
 	const history = useHistory();
 
 	useEffect(() => {
-		authService.logout().then( res => {
+		authService.logout().then(res => {
 			history.push('/login');
 		})
 	});
-	return <div>Logout</div>;
+	return (
+		<div>Logout</div>
+	);
 }

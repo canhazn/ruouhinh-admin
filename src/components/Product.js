@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
-import { config } from '../../Constant';
-import axiosInstance from "../../Axios";
+import { config } from '../Constant';
+import axiosInstance from "../Axios";
+import { Trash, Pen } from "react-bootstrap-icons"
 
 const initForm = {
   quantity: "",
@@ -15,22 +16,28 @@ const initForm = {
 };
 
 function ListItems(props) {
-  let orders = props.orders;
-  if (orders.length === 0) return (
-    <tbody>
-
-    </tbody>
+  let { orders, onDelete, onUpdate } = props;
+  if (!orders) return (
+    <tbody></tbody>
   )
-  let listorders = orders.map((order, index) => {
+  let listorders = orders.map((item, index) => {
     return (
-      <tr key={order.id}>
-        {/* <th scope="row">{index}</th> */}
-        <td><Moment format="DD-M-YY">{order.date_created}</Moment></td>
-        <td>{order.customer_name}</td>
-        <td><NumberFormat value={order.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
-        <td>{order.completed ? "" : "nợ"}</td>
-        <td>{order.quantity}</td>
-        <td>{order.note} </td>
+      <tr key={item.id}>
+        <td className="text-center"><Moment format="DD-M-YY">{item.date_created}</Moment></td>
+        <td className="text-center"><NumberFormat value={item.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
+        <td className="text-center">{item.customer_name}</td>
+        <td className="text-center custom-hidden">{item.product == "1" ? "20 lít" : "10 lít"}</td>
+        <td className="text-center custom-hidden">{item.completed ? ".." : "nợ"}</td>
+        <td className="text-center custom-hidden">{item.quantity}</td>
+        <td className="text-center custom-hidden">{item.note ? item.note : ".."}</td>
+        <td className="text-center">
+          <span className="cursor-pointer mx-3" onClick={() => onUpdate(item)}>
+            <Pen className=""></Pen>
+          </span>
+          <span className="cursor-pointer" onClick={() => onDelete(item.id)}>
+            <Trash></Trash>
+          </span>
+        </td>
       </tr>
     )
   });
@@ -82,23 +89,59 @@ class Product extends Component {
         search: ""
       },
       orders: [],
-      form_value: initForm
+      form_value: initForm,
+      on_updating: false,
+      id: ""
     }
     this.handleFilter = this.handleFilter.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.onDelete = this.onDelete.bind(this);
+    this.onUpdate = this.onUpdate.bind(this);
+    this.cancelUpdate = this.cancelUpdate.bind(this);
   }
 
   getList() {
     let url = `${config.API_URL}/order/?search=${this.state.filter.search}`;
 
-    fetch(url).then(response => response.json()).then(res => {
+    axiosInstance.get(url).then(res => {
       this.setState({
-        count: res.count,
-        orders: res.results,
-        next: res.next,
-        previou: res.previou
+        count: res.data.count,
+        orders: res.data.results,
+        next: res.data.next,
+        previou: res.data.previou,
+        orders: res.data.results
       })
+    })
+  }
+
+  onDelete(id) {
+    if (window.confirm('Are you sure you wish to delete this item?')) {
+      console.log("delete,", id)
+
+      const url = `${config.API_URL}/order/${id}`;
+      axiosInstance.delete(url).then(data => {
+        console.log(this);
+        this.getList();
+      });
+    }
+  }
+
+  onUpdate(receipt) {
+    this.setState((prevState) => {
+
+      let form_value = { ...receipt };
+      return {
+        on_updating: true,
+        form_value
+      };
+    });
+  }
+
+  cancelUpdate() {
+    this.setState({
+      on_updating: false,
+      form_value: initForm
     })
   }
 
@@ -126,8 +169,8 @@ class Product extends Component {
     this.setState((prevState) => {
       let form_value = { ...prevState.form_value };
       form_value[name] = value;
-      if (form_value["product"] === "1" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 500000;
-      if (form_value["product"] === "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 250000;
+      if (form_value["product"] == "1" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 500000;
+      if (form_value["product"] == "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 250000;
       return { form_value };
     });
   }
@@ -138,14 +181,31 @@ class Product extends Component {
     const url = `${config.API_URL}/order/`;
     let value = JSON.stringify(this.state.form_value);
 
-    axiosInstance.post(url, value).then(data => {
-      console.log(data);
-      this.getList();
-      this.setState((prevState) => {
-        let form_value = initForm;
-        return { form_value };
+
+    if (this.state.on_updating) {
+      // Update item
+      axiosInstance.put(`${config.API_URL}/order/${this.state.form_value.id}/`, value).then(data => {
+        console.log(data);
+        this.getList();
+        this.setState((prevState) => {
+          let form_value = initForm;
+          return {
+            on_updating: false,
+            form_value
+          };
+        });
       });
-    });
+    } else {
+      // Create item
+      axiosInstance.post(url, value).then(data => {
+        console.log(data);
+        this.getList();
+        this.setState((prevState) => {
+          let form_value = initForm;
+          return { form_value };
+        });
+      });
+    }
   }
 
   componentDidMount() {
@@ -156,7 +216,7 @@ class Product extends Component {
     return (
       <div className="row mt-3">
         <div className="col-md-4">
-          <legend>Bán rượu</legend>
+          <legend>Xuất</legend>
           <hr />
           <form onSubmit={this.handleSubmit}>
             {/* Loai ruou */}
@@ -193,8 +253,18 @@ class Product extends Component {
               <input id="completed" name="completed" type="checkbox" className="mx-2" checked={this.state.form_value.completed} onChange={this.handleChange} />
             </div>
 
-            <input type="submit" className={(this.state.form_value.completed ? 'btn-primary' : 'btn-secondary') + " btn w-100 save-btn"} value="Nhập" disabled={this.state.form_value.quantity === "" || this.state.form_value.total_cost === ""} />
+            {/* Submit btn */}
+            <div className="mb-3 d-flex">
+              {this.state.on_updating &&
+                <div>
+                  {/* For edit item: cancel button and id of item */}
+                  <input type="number" name="id" defaultValue={this.state.form_value.id} hidden />
+                  <span className="btn btn-primary me-3 px-5" onClick={this.cancelUpdate}>Hủy</span>
+                </div>
+              }
 
+              <input type="submit" className="btn btn-primary w-100" value={this.state.on_updating ? "Lưu thay đổi" : "Xuất"} disabled={this.state.form_value.quantity === "" || this.state.form_value.total_cost === ""} />
+            </div>
           </form>
         </div>
 
@@ -222,15 +292,17 @@ class Product extends Component {
               <thead>
                 <tr>
                   {/* <th scope="col">#</th> */}
-                  <th scope="col">Ngày</th>
-                  <th scope="col">Khách hàng</th>
-                  <th scope="col">Tổng tiền</th>
-                  <th scope="col">Đã thanh toán</th>
-                  <th scope="col">Số can</th>
-                  <th scope="col">Ghi chú</th>
+                  <th scope="col" className="text-center">Ngày</th>
+                  <th scope="col" className="text-center ">Tổng tiền</th>
+                  <th scope="col" className="text-center">Khách hàng</th>
+                  <th scope="col" className="text-center custom-hidden">Loại</th>
+                  <th scope="col" className="text-center custom-hidden">...</th>
+                  <th scope="col" className="text-center custom-hidden">Số can</th>
+                  <th scope="col" className="text-center custom-hidden">Ghi chú</th>
+                  <th scope="col" className="text-center">Tùy chọn</th>
                 </tr>
               </thead>
-              <ListItems orders={this.state.orders}></ListItems>
+              <ListItems orders={this.state.orders} onUpdate={this.onUpdate} onDelete={this.onDelete}></ListItems>
             </table>
             {this.state.orders.length === 0 && <div>
               <p>Emty data</p>

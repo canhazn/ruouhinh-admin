@@ -1,9 +1,9 @@
 import React, { useState, Component } from 'react';
-import { config } from '../../../Constant';
+import { config } from '../Constant';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
-import axiosInstance from "../../../Axios";
-import styles from "./Rice.module.css";
+import axiosInstance from "../Axios";
+
 import { Trash, Pen } from "react-bootstrap-icons"
 
 function NumberFormatCustom(props) {
@@ -39,20 +39,24 @@ const initForm = {
 function ListItems(props) {
   let { receipts, onDelete, onUpdate } = props;
 
+  if (!receipts) return (
+    <tbody>    </tbody>
+  )
+  
   let listReceipts = receipts.map((receipt, index) => {
     return (
       <tr key={receipt.id}>
         <th className="text-center"> {receipt.material === 1 ? "Gạo" : "Men"}</th>
         <td className="text-center"><Moment format="DD-MM-YYYY">{receipt.date_created}</Moment></td>
-        <td className="text-center">{receipt.quantity} {receipt.material === 1 ? "bao" : "cân"}</td>
+        <td className="text-center d-none d-md-block">{receipt.quantity} {receipt.material === 1 ? "bao" : "cân"}</td>
         <td className="text-center"><NumberFormat value={receipt.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
         <td className="text-center">
-          <button className="btn me-2" onClick={() => onUpdate(receipt)}>
+          <span className="cursor-pointer mx-3" onClick={() => onUpdate(receipt)}>
             <Pen className=""></Pen>
-          </button>
-          <button className="btn" onClick={() => onDelete(receipt.id)}>
+          </span>
+          <span className="cursor-pointer" onClick={() => onDelete(receipt.id)}>
             <Trash></Trash>
-          </button>
+          </span>
         </td>
       </tr>
     )
@@ -87,8 +91,10 @@ class Rice extends Component {
 
   getList() {
     const url = `${config.API_URL}/receipt/`;
-    fetch(url).then(response => response.json()).then(res => {
-      this.setState({ receipts: res.results })
+    axiosInstance.get(url).then(res => {
+      
+      console.log(res)
+      this.setState({ receipts: res.data.results })
     })
   }
 
@@ -127,7 +133,7 @@ class Rice extends Component {
     // const target = event.target;
     // const value = target.value;
     // const name = target.name;
-    
+
     // update form data to state
     this.setState((prevState) => {
       let form_value = { ...prevState.form_value };
@@ -169,7 +175,7 @@ class Rice extends Component {
         this.getList();
         this.setState((prevState) => {
           let form_value = initForm;
-          return {            
+          return {
             form_value
           };
         });
@@ -184,9 +190,7 @@ class Rice extends Component {
 
   render() {
     return (
-      <div className="row">
-        <div className={styles.bg_custom}></div>
-
+      <div className="row mt-3">
         <div className="col-md-4">
           <legend>Nhập</legend>
           <hr />
@@ -229,7 +233,7 @@ class Rice extends Component {
                 <tr>
                   <th scope="col" className="text-center">Loại</th>
                   <th scope="col" className="text-center">Ngày</th>
-                  <th scope="col" className="text-center">Số lượng</th>
+                  <th scope="col" className="text-center d-none d-md-block">Số lượng</th>
                   <th scope="col" className="text-center">Tổng tiền</th>
                   <th scope="col" className="text-center">Tùy chọn</th>
                 </tr>

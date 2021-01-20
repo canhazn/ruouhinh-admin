@@ -1,14 +1,10 @@
-import Container from './Container/Container';
 import { Login, Logout } from "./Auth";
-import TopNav from './TopNav/TopNav';
-import Home from './Home/Home';
-import Product from './Product/Product';
-import Material from "./Material/Material";
+import TopNav from './TopNav';
+import Product from './Product';
+import Material from "./Material";
 
 export {
-    Container,
     TopNav,
-    Home,
     Material,
     Product,
 

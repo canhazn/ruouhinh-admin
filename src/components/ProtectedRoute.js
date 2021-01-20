@@ -1,5 +1,6 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
+import { authService } from "./Auth/authService";
 
 export const ProtectedRoute = ({
   component: Component,
@@ -9,13 +10,13 @@ export const ProtectedRoute = ({
     <Route
       {...rest}
       render={props => {
-        if (true) {
+        if (authService.isAuthenticated()) {
           return <Component {...props} />;
         } else {
           return (
             <Redirect
               to={{
-                pathname: "/",
+                pathname: "/login",
                 state: {
                   from: props.location
                 }

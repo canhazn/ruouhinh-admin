@@ -1,9 +1,14 @@
 import axiosInstance from '../../Axios';
 
-
 export const authService = {
     login,
-    logout
+    logout,
+    isAuthenticated,
+}
+
+function isAuthenticated() {
+    let user = localStorage.getItem('user');    
+    return !!user;
 }
 
 
