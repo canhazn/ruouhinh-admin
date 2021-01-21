@@ -11,6 +11,7 @@ export default function Login() {
     });
 
     const [formData, updateFormData] = useState(initialFormData);
+    const [loading, updateLoading] = useState(false)
 
     const handleChange = (e) => {
         updateFormData({
@@ -22,11 +23,12 @@ export default function Login() {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(formData);
+        updateLoading(true);
 
         authService.login(formData.email, formData.password).then(res => {
             history.push('/');
+            updateLoading(false);
         })
-
     };
 
     return (
@@ -45,7 +47,7 @@ export default function Login() {
 
 
             <form className="m-auto form-login">
-                <legend>Login:</legend>
+                <legend>Đăng nhập:</legend>
                 <div class="position-relative form-group mb-3">
                     <input required id="email" placeholder="email" name="email" onChange={handleChange} className="form-control" />
                 </div>
@@ -54,7 +56,12 @@ export default function Login() {
                     <input required name="password" placeholder="Password" type="password" id="password" onChange={handleChange} className="form-control" />
                 </div>
 
-                <button type="submit" className="btn btn-primary" onClick={handleSubmit}>Sign In</button>
+                <button type="submit" className="btn btn-primary" onClick={handleSubmit} disabled={loading}>
+                    <span >Đăng nhập</span>
+                    {loading && <div class="ms-3 spinner-border spinner-border-sm" role="status">
+                        <span class="sr-only"></span>
+                    </div>}
+                </button>
             </form>
         </div>
 
