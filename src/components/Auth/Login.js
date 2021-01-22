@@ -52,7 +52,7 @@ export default function Login() {
             <form className="m-auto form-login">
                 <legend>Đăng nhập:</legend>
                 <div className="position-relative form-group mb-3">
-                    <input required id="email" placeholder="email" name="email" onChange={handleChange} className="form-control"/>
+                    <input required type="email" id="email" placeholder="email" name="email" onChange={handleChange} className="form-control"/>
                 </div>
 
                 <div className="position-relative form-group mb-3">

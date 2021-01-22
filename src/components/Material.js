@@ -27,9 +27,9 @@ function ListItems(props) {
   let listReceipts = receipts.map((receipt, index) => {
     return (
       <tr key={receipt.id}>
-        <th className="text-center"> {receipt.material === 1 ? "Gạo" : "Men"}</th>
+        <th className="text-center"> {String(receipt.material) === "1" ? "Gạo" : "Men"}</th>
         <td className="text-center"><Moment format="DD-MM-YYYY">{receipt.date_created}</Moment></td>
-        <td className="text-center d-none d-md-block">{receipt.quantity} {receipt.material === 1 ? "bao" : "cân"}</td>
+        <td className="text-center d-none d-md-block">{receipt.quantity} {String(receipt.material) === "1" ? "bao" : "cân"}</td>
         <td className="text-center"><NumberFormat value={receipt.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
         <td className="text-center">
           <span className="cursor-pointer mx-3" onClick={() => onUpdate(receipt)}>
@@ -86,7 +86,7 @@ class Rice extends Component {
   }
 
   onDelete(id) {
-    if (window.confirm('Are you sure you wish to delete this item?')) {
+    if (window.confirm('Xác nhận xóa?')) {
       console.log("delete,", id)
 
       const url = `${config.API_URL}/receipt/${id}`;
@@ -129,7 +129,7 @@ class Rice extends Component {
 
       form_value[name] = value;
       console.log(form_value);
-      if (form_value["material"]==="2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 25000;
+      if (String(form_value["material"]) ==="2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 25000;
       return { receipt_form: receipt_form };
     });
   }
@@ -198,7 +198,7 @@ class Rice extends Component {
 
             {/* Số bao */}
             <div className="mb-3">
-              <input type="number" className="form-control" placeholder={this.state.receipt_form.form_value.material === "1" ? "Số bao" : "Số cân"} name="quantity" value={this.state.receipt_form.form_value.quantity} onChange={this.handleChange} required />
+              <input type="number" className="form-control" placeholder={String(this.state.receipt_form.form_value.material) === "1" ? "Số bao" : "Số cân"} name="quantity" value={this.state.receipt_form.form_value.quantity} onChange={this.handleChange} required />
             </div>
             {/* Giá */}
             <div className="mb-3">
@@ -215,7 +215,7 @@ class Rice extends Component {
                 </div>
               }
 
-              <button type="submit" className="btn btn-primary w-100" disabled={this.state.receipt_form.form_value.quantity === "" || this.state.receipt_form.form_value.total_cost === ""}>
+              <button type="submit" className="btn btn-primary w-100" disabled={String(this.state.receipt_form.form_value.quantity) === "" || String(this.state.receipt_form.form_value.total_cost) === ""}>
                 {!this.state.receipt_form.sending &&
                   <span >{this.state.receipt_form.update_mode ? "Lưu thay đổi" : "Nhập"}</span>
                 }

@@ -28,7 +28,7 @@ function ListItems(props) {
         <td className="text-center"><Moment format="DD-M-YY">{item.date_created}</Moment></td>
         <td className="text-center"><NumberFormat value={item.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
         <td className="text-center">{item.customer_name}</td>
-        <td className="text-center custom-hidden">{item.product==="1" ? "20 lít" : "10 lít"}</td>
+        <td className="text-center custom-hidden">{String(item.product) === "1" ? "20 lít" : "10 lít"}</td>
         <td className="text-center custom-hidden">{item.completed ? ".." : "nợ"}</td>
         <td className="text-center custom-hidden">{item.quantity}</td>
         <td className="text-center custom-hidden">{item.note ? item.note : ".."}</td>
@@ -90,14 +90,14 @@ class Product extends Component {
         count: res.data.count,
         orders: res.data.results,
         next: res.data.next,
-        previou: res.data.previou,        
+        previou: res.data.previou,
         loading: false,
       })
     })
   }
 
   onDelete(id) {
-    if (window.confirm('Are you sure you wish to delete this item?')) {
+    if (window.confirm('Xác nhận xóa?')) {
       console.log("delete,", id)
 
       const url = `${config.API_URL}/order/${id}`;
@@ -151,8 +151,8 @@ class Product extends Component {
       let order_form = { ...prevState.order_form };
       let form_value = order_form.form_value;
       form_value[name] = value;
-      if (form_value["product"]==="1" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 500000;
-      if (form_value["product"]==="2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 250000;      
+      if (String(form_value["product"]) === "1" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 500000;
+      if (String(form_value["product"]) === "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 250000;
       return { order_form: order_form };
     });
   }
@@ -297,8 +297,8 @@ class Product extends Component {
                   <th scope="col" className="text-center">Tùy chọn</th>
                 </tr>
               </thead>
-              {!this.state.loading && 
-              <ListItems orders={this.state.orders} onUpdate={this.onUpdate} onDelete={this.onDelete}></ListItems>
+              {!this.state.loading &&
+                <ListItems orders={this.state.orders} onUpdate={this.onUpdate} onDelete={this.onDelete}></ListItems>
               }
             </table>
             {this.state.loading &&
