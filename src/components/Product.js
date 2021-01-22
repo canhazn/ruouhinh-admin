@@ -1,5 +1,6 @@
-import React, { Component } from 'react';
+/*jslint eqeq: true*/
 
+import React, { Component } from 'react';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
 import NumberFormatCustom from "./NumberFormatCustom";

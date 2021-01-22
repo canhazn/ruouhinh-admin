@@ -1,3 +1,5 @@
+/*jslint eqeq: true*/
+
 import React, { Component } from 'react';
 import { config } from '../Constant';
 import Moment from 'react-moment';
