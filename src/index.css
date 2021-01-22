@@ -5,6 +5,11 @@
   margin: auto;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
+
 @media (max-width: 575.98px) {  
   .custom-hidden {
     display: none;

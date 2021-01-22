@@ -5,6 +5,7 @@ import { authService } from './authService';
 
 export default function Login() {
     const history = useHistory();
+
     const initialFormData = Object.freeze({
         email: '',
         password: '',
@@ -23,6 +24,8 @@ export default function Login() {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(formData);
+
+        if (!formData.email || !formData.password) return;
         updateLoading(true);
 
         authService.login(formData.email, formData.password).then(res => {
@@ -49,14 +52,14 @@ export default function Login() {
             <form className="m-auto form-login">
                 <legend>Đăng nhập:</legend>
                 <div class="position-relative form-group mb-3">
-                    <input required id="email" placeholder="email" name="email" onChange={handleChange} className="form-control" />
+                    <input required id="email" placeholder="email" name="email" onChange={handleChange} className="form-control"/>
                 </div>
 
                 <div class="position-relative form-group mb-3">
                     <input required name="password" placeholder="Password" type="password" id="password" onChange={handleChange} className="form-control" />
                 </div>
 
-                <button type="submit" className="btn btn-primary" onClick={handleSubmit} disabled={loading}>
+                <button type="submit" className="btn btn-primary" onClick={handleSubmit} disabled={loading || !formData.email || !formData.password}>
                     <span >Đăng nhập</span>
                     {loading && <div class="ms-3 spinner-border spinner-border-sm" role="status">
                         <span class="sr-only"></span>

@@ -1,4 +1,4 @@
-import { Login, Logout } from "./Auth";
+import { Login } from "./Auth";
 import TopNav from './TopNav';
 import Product from './Product';
 import Material from "./Material";
@@ -8,6 +8,5 @@ export {
     Material,
     Product,
 
-    Login,
-    Logout,
+    Login,    
 };

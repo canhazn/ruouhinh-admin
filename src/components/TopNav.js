@@ -12,7 +12,6 @@ export default function TopNav(props) {
         '/login/'
     );
 
-
     const onLogout = () => {
         updateLoading(true);
 

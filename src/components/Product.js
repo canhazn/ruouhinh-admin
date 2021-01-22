@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
+import NumberFormatCustom from "./NumberFormatCustom";
 import { config } from '../Constant';
 import axiosInstance from "../Axios";
 import { Trash, Pen } from "react-bootstrap-icons"
@@ -50,32 +51,6 @@ function ListItems(props) {
 }
 
 
-function NumberFormatCustom(props) {
-  const { inputRef, onChange, ...other } = props;
-
-  return (
-    <NumberFormat
-      {...other}
-      getInputRef={inputRef}
-
-      onValueChange={values => {
-        onChange({
-          target: {
-            // cái target này sẽ được chuyền qua onChange
-            // nên nó cần có cả name và value để setState đọc
-            name: "total_cost",
-            value: values.value
-          },
-        });
-      }}
-      thousandSeparator
-      suffix=" đ"
-    />
-  );
-}
-
-
-
 class Product extends Component {
   constructor(props) {
     super(props);
@@ -89,8 +64,12 @@ class Product extends Component {
         search: ""
       },
       orders: [],
-      form_value: initForm,
-      on_updating: false,
+      order_form: {
+        form_value: { ...initForm },
+        update_mode: false,
+        sending: false,
+      },
+      loading: true,
       id: ""
     }
     this.handleFilter = this.handleFilter.bind(this);
@@ -102,6 +81,7 @@ class Product extends Component {
   }
 
   getList() {
+    this.setState({ loading: true });
     let url = `${config.API_URL}/order/?search=${this.state.filter.search}`;
 
     axiosInstance.get(url).then(res => {
@@ -110,7 +90,8 @@ class Product extends Component {
         orders: res.data.results,
         next: res.data.next,
         previou: res.data.previou,
-        orders: res.data.results
+        orders: res.data.results,
+        loading: false,
       })
     })
   }
@@ -129,19 +110,19 @@ class Product extends Component {
 
   onUpdate(receipt) {
     this.setState((prevState) => {
-
-      let form_value = { ...receipt };
-      return {
-        on_updating: true,
-        form_value
-      };
+      let order_form = { ...prevState };
+      order_form.form_value = { ...receipt };
+      order_form.update_mode = true;
+      return { order_form: order_form };
     });
   }
 
   cancelUpdate() {
     this.setState({
-      on_updating: false,
-      form_value: initForm
+      order_form: {
+        update_mode: false,
+        form_value: { ...initForm }
+      }
     })
   }
 
@@ -167,43 +148,51 @@ class Product extends Component {
 
     // update form data to state
     this.setState((prevState) => {
-      let form_value = { ...prevState.form_value };
+      let order_form = { ...prevState.order_form };
+      let form_value = order_form.form_value;
       form_value[name] = value;
       if (form_value["product"] == "1" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 500000;
       if (form_value["product"] == "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 250000;
-      return { form_value };
+      console.log(order_form);
+      return { order_form: order_form };
     });
   }
 
   handleSubmit(event) {
     event.preventDefault();
 
+    this.setState({ order_form: { ...this.state.order_form, sending: true } });
+
     const url = `${config.API_URL}/order/`;
-    let value = JSON.stringify(this.state.form_value);
+    let value = JSON.stringify(this.state.order_form.form_value);
 
 
-    if (this.state.on_updating) {
+    if (this.state.order_form.update_mode) {
       // Update item
-      axiosInstance.put(`${config.API_URL}/order/${this.state.form_value.id}/`, value).then(data => {
-        console.log(data);
+      axiosInstance.put(`${config.API_URL}/order/${this.state.order_form.form_value.id}/`, value).then(data => {
         this.getList();
-        this.setState((prevState) => {
-          let form_value = initForm;
-          return {
-            on_updating: false,
-            form_value
-          };
+
+        this.setState({
+          order_form: {
+            update_mode: false,
+            sending: false,
+            form_value: { ...initForm }
+          }
         });
       });
     } else {
       // Create item
       axiosInstance.post(url, value).then(data => {
-        console.log(data);
-        this.getList();
-        this.setState((prevState) => {
-          let form_value = initForm;
-          return { form_value };
+
+        this.setState({
+          order_form: {
+            update_mode: false,
+            sending: false,
+            form_value: { ...initForm }
+          }
         });
+
+        this.getList();
       });
     }
   }
@@ -221,7 +210,7 @@ class Product extends Component {
           <form onSubmit={this.handleSubmit}>
             {/* Loai ruou */}
             <div className="form-group mb-3">
-              <select className="form-control" name="product" value={this.state.form_value.product} onChange={this.handleChange} >
+              <select className="form-control" name="product" value={this.state.order_form.form_value.product} onChange={this.handleChange} >
                 <option value="1">Can 20 lit</option>
                 <option value="2">Can 10 lit</option>
               </select>
@@ -229,41 +218,48 @@ class Product extends Component {
 
             {/* Customer */}
             <div className="mb-3">
-              <input type="text" className="form-control mb-3" placeholder="Khách hàng" name="customer_name" value={this.state.form_value.customer_name} onChange={this.handleChange} required />
+              <input type="text" className="form-control mb-3" placeholder="Khách hàng" name="customer_name" value={this.state.order_form.form_value.customer_name} onChange={this.handleChange} required />
             </div>
 
             {/* Số can */}
             <div className="mb-3">
-              <input type="number" className="form-control mb-3" placeholder="Số can" name="quantity" value={this.state.form_value.quantity} onChange={this.handleChange} required />
+              <input type="number" className="form-control mb-3" placeholder="Số can" name="quantity" value={this.state.order_form.form_value.quantity} onChange={this.handleChange} required />
             </div>
 
             {/* Giá */}
             <div className="mb-3">
-              <NumberFormatCustom className="form-control mb-3" placeholder="Giá" name="total_cost" value={this.state.form_value.total_cost} onChange={this.handleChange} thousandSeparator={true} suffix={' đ'} required />
+              <NumberFormatCustom className="form-control mb-3" placeholder="Giá" name="total_cost" value={this.state.order_form.form_value.total_cost} onChange={this.handleChange} thousandSeparator={true} suffix={' đ'} required />
             </div>
 
             {/* Ghi chú */}
             <div className="mb-3">
-              <input type="text" className="form-control mb-3" placeholder="Ghi chú" name="note" value={this.state.form_value.note} onChange={this.handleChange} />
+              <input type="text" className="form-control mb-3" placeholder="Ghi chú" name="note" value={this.state.order_form.form_value.note} onChange={this.handleChange} />
             </div>
 
             {/* Đã trả */}
             <div className="mb-3">
               <label htmlFor="completed">Đã thanh toán: </label>
-              <input id="completed" name="completed" type="checkbox" className="mx-2" checked={this.state.form_value.completed} onChange={this.handleChange} />
+              <input id="completed" name="completed" type="checkbox" className="mx-2" checked={this.state.order_form.form_value.completed} onChange={this.handleChange} />
             </div>
 
             {/* Submit btn */}
             <div className="mb-3 d-flex">
-              {this.state.on_updating &&
+              {this.state.order_form.update_mode &&
                 <div>
                   {/* For edit item: cancel button and id of item */}
-                  <input type="number" name="id" defaultValue={this.state.form_value.id} hidden />
-                  <span className="btn btn-primary me-3 px-5" onClick={this.cancelUpdate}>Hủy</span>
+                  <input type="number" name="id" defaultValue={this.state.order_form.form_value.id} hidden />
+                  <span className={(this.state.order_form.sending ? "invisible" : "visible") + " btn btn-primary me-3 px-5"} onClick={this.cancelUpdate} >Hủy</span>
                 </div>
               }
 
-              <input type="submit" className="btn btn-primary w-100" value={this.state.on_updating ? "Lưu thay đổi" : "Xuất"} disabled={this.state.form_value.quantity === "" || this.state.form_value.total_cost === ""} />
+              <button type="submit" className="btn btn-primary w-100" disabled={this.state.order_form.form_value.quantity === "" || this.state.order_form.form_value.total_cost === ""}>
+                {!this.state.order_form.sending &&
+                  <span >{this.state.order_form.update_mode ? "Lưu thay đổi" : "Xuất"}</span>
+                }
+                {this.state.order_form.sending && <div class="ms-3 spinner-border spinner-border-sm" role="status">
+                  <span class="sr-only"></span>
+                </div>}
+              </button>
             </div>
           </form>
         </div>
@@ -302,11 +298,21 @@ class Product extends Component {
                   <th scope="col" className="text-center">Tùy chọn</th>
                 </tr>
               </thead>
+              {!this.state.loading && 
               <ListItems orders={this.state.orders} onUpdate={this.onUpdate} onDelete={this.onDelete}></ListItems>
+              }
             </table>
-            {this.state.orders.length === 0 && <div>
+            {this.state.loading &&
+
+              <div class="ms-3 spinner-border spinner-border-sm" role="status">
+                <span class="sr-only"></span>
+              </div>
+
+            }
+            {this.state.orders.length === 0 && !this.state.loading && <div>
               <p>Emty data</p>
-            </div>}
+            </div>
+            }
           </div>
 
         </div>
