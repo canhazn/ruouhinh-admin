@@ -32,8 +32,8 @@ export default function TopNav(props) {
                         <div className="nav-link d-inline-block text-primary cursor-pointer" onClick={onLogout} >
                             <span >Đăng xuất</span>
                             {loading &&
-                                <div class="ms-2 spinner-border spinner-border-sm" role="status">
-                                    <span class="sr-only"></span>
+                                <div className="ms-2 spinner-border spinner-border-sm" role="status">
+                                    <span className="sr-only"></span>
                                 </div>
                             }
                         </div>

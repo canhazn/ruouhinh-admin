@@ -2,32 +2,11 @@ import React, { useState, Component } from 'react';
 import { config } from '../Constant';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
+import NumberFormatCustom from "./NumberFormatCustom";
 import axiosInstance from "../Axios";
 
 import { Trash, Pen } from "react-bootstrap-icons"
 
-function NumberFormatCustom(props) {
-  const { inputRef, onChange, ...other } = props;
-
-  return (
-    <NumberFormat
-      {...other}
-      getInputRef={inputRef}
-      onValueChange={values => {
-        onChange({
-          target: {
-            // cái target này sẽ được chuyền qua onChange
-            // nên nó cần có cả name và value để setState đọc
-            name: "total_cost",
-            value: values.value
-          },
-        });
-      }}
-      thousandSeparator
-      suffix=" đ"
-    />
-  );
-}
 
 const initForm = {
   quantity: "",
@@ -40,9 +19,9 @@ function ListItems(props) {
   let { receipts, onDelete, onUpdate } = props;
 
   if (!receipts) return (
-    <tbody>    </tbody>
+    <tbody></tbody>
   )
-  
+
   let listReceipts = receipts.map((receipt, index) => {
     return (
       <tr key={receipt.id}>
@@ -78,8 +57,14 @@ class Rice extends Component {
     this.state = {
       receipts: [],
       form_value: initForm,
-      on_updating: false,
-      id: ""
+      update_mode: false,
+      id: "",
+      receipt_form: {
+        form_value: { ...initForm },
+        update_mode: false,
+        sending: false,
+      },
+      loading: true,
     }
 
     this.handleChange = this.handleChange.bind(this);
@@ -90,11 +75,11 @@ class Rice extends Component {
   }
 
   getList() {
+    this.setState({ loading: true });
     const url = `${config.API_URL}/receipt/`;
     axiosInstance.get(url).then(res => {
-      
       console.log(res)
-      this.setState({ receipts: res.data.results })
+      this.setState({ receipts: res.data.results, loading: false })
     })
   }
 
@@ -111,20 +96,21 @@ class Rice extends Component {
   }
 
   onUpdate(receipt) {
-    this.setState((prevState) => {
 
-      let form_value = { ...receipt };
-      return {
-        on_updating: true,
-        form_value
-      };
+    this.setState((prevState) => {
+      let receipt_form = { ...prevState };
+      receipt_form.form_value = { ...receipt };
+      receipt_form.update_mode = true;
+      return { receipt_form: receipt_form };
     });
   }
 
   cancelUpdate() {
     this.setState({
-      on_updating: false,
-      form_value: initForm
+      receipt_form: {
+        update_mode: false,
+        form_value: { ...initForm }
+      }
     })
   }
 
@@ -136,49 +122,55 @@ class Rice extends Component {
 
     // update form data to state
     this.setState((prevState) => {
-      let form_value = { ...prevState.form_value };
+      let receipt_form = { ...prevState.receipt_form };
+      let form_value = receipt_form.form_value;
+
       form_value[name] = value;
       console.log(form_value);
       if (form_value["material"] == "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 25000;
-      return { form_value };
+      return { receipt_form: receipt_form };
     });
   }
 
   handleSubmit(event) {
     event.preventDefault();
 
+    this.setState({ receipt_form: { ...this.state.receipt_form, sending: true } });
+
     // Validate data
-    if (this.state.form_value.quantity === "" || this.state.form_value.total_cost === "") {
+    if (this.state.receipt_form.form_value.quantity === "" || this.state.receipt_form.form_value.total_cost === "") {
       return;
     }
 
     const url = `${config.API_URL}/receipt/`;
-    let value = JSON.stringify(this.state.form_value);
+    let value = JSON.stringify(this.state.receipt_form.form_value);
 
-    if (this.state.on_updating) {
+    if (this.state.receipt_form.update_mode) {
       // Update item
-      axiosInstance.put(`${config.API_URL}/receipt/${this.state.form_value.id}/`, value).then(data => {
-        console.log(data);
+      axiosInstance.put(`${config.API_URL}/receipt/${this.state.receipt_form.form_value.id}/`, value).then(data => {
+
         this.getList();
-        this.setState((prevState) => {
-          let form_value = initForm;
-          return {
-            on_updating: false,
-            form_value
-          };
+
+        this.setState({
+          receipt_form: {
+            update_mode: false,
+            sending: false,
+            form_value: { ...initForm }
+          }
         });
       });
     } else {
       // Create item
       axiosInstance.post(url, value).then(data => {
-        console.log(data);
-        this.getList();
-        this.setState((prevState) => {
-          let form_value = initForm;
-          return {
-            form_value
-          };
+        this.setState({
+          receipt_form: {
+            update_mode: false,
+            sending: false,
+            form_value: { ...initForm }
+          }
         });
+
+        this.getList();
       });
     }
 
@@ -196,7 +188,7 @@ class Rice extends Component {
           <hr />
           <form onSubmit={this.handleSubmit}>
             <div className="form-group mb-3">
-              <select className="form-select" name="material" value={this.state.form_value.material} onChange={this.handleChange} >
+              <select className="form-select" name="material" value={this.state.receipt_form.form_value.material} onChange={this.handleChange} >
                 <option value="1">Gạo</option>
                 <option value="2">Men</option>
               </select>
@@ -204,24 +196,43 @@ class Rice extends Component {
 
             {/* Số bao */}
             <div className="mb-3">
-              <input type="number" className="form-control" placeholder={this.state.form_value.material === "1" ? "Số bao" : "Số cân"} name="quantity" value={this.state.form_value.quantity} onChange={this.handleChange} required />
+              <input type="number" className="form-control" placeholder={this.state.receipt_form.form_value.material === "1" ? "Số bao" : "Số cân"} name="quantity" value={this.state.receipt_form.form_value.quantity} onChange={this.handleChange} required />
             </div>
             {/* Giá */}
             <div className="mb-3">
-              <NumberFormatCustom className="form-control" placeholder="Giá" name="total_cost" value={this.state.form_value.total_cost} onChange={this.handleChange} thousandSeparator={true} suffix={' đ'} required />
+              <NumberFormatCustom className="form-control" placeholder="Giá" name="total_cost" value={this.state.receipt_form.form_value.total_cost} onChange={this.handleChange} thousandSeparator={true} suffix={' đ'} required />
             </div>
 
             {/* Submit btn */}
             <div className="mb-3 d-flex">
-              {this.state.on_updating &&
+              {this.state.receipt_form.update_mode &&
                 <div>
                   {/* For edit item: cancel button and id of item */}
-                  <input type="number" name="id" defaultValue={this.state.form_value.id} hidden />
+                  <input type="number" name="id" defaultValue={this.state.receipt_form.form_value.id} hidden />
+                  <span className={(this.state.receipt_form.sending ? "invisible" : "visible") + " btn btn-primary me-3 px-5"} onClick={this.cancelUpdate} >Hủy</span>
+                </div>
+              }
+
+              <button type="submit" className="btn btn-primary w-100" disabled={this.state.receipt_form.form_value.quantity === "" || this.state.receipt_form.form_value.total_cost === ""}>
+                {!this.state.receipt_form.sending &&
+                  <span >{this.state.receipt_form.update_mode ? "Lưu thay đổi" : "Nhập"}</span>
+                }
+                {this.state.receipt_form.sending && <div className="ms-3 spinner-border spinner-border-sm" role="status">
+                  <span className="sr-only"></span>
+                </div>}
+              </button>
+            </div>
+            {/*             
+            <div className="mb-3 d-flex">
+              {this.state.receipt_form.update_mode &&
+                <div>
+                  
+                  <input type="number" name="id" defaultValue={this.state.receipt_form.form_value.id} hidden />
                   <span className="btn btn-primary me-3 px-5" onClick={this.cancelUpdate}>Hủy</span>
                 </div>
               }
-              <input type="submit" className="btn btn-primary w-100" value={this.state.on_updating ? "Lưu thay đổi" : "Nhập"} disabled={this.state.form_value.quantity === "" || this.state.form_value.total_cost === ""} />
-            </div>
+              <input type="submit" className="btn btn-primary w-100" value={this.state.receipt_form.update_mode ? "Lưu thay đổi" : "Nhập"} disabled={this.state.receipt_form.form_value.quantity === "" || this.state.receipt_form.form_value.total_cost === ""} />
+            </div> */}
           </form>
         </div>
 
@@ -238,9 +249,21 @@ class Rice extends Component {
                   <th scope="col" className="text-center">Tùy chọn</th>
                 </tr>
               </thead>
-              <ListItems receipts={this.state.receipts} onUpdate={this.onUpdate} onDelete={this.onDelete}></ListItems>
-
+              {!this.state.loading &&
+                <ListItems receipts={this.state.receipts} onUpdate={this.onUpdate} onDelete={this.onDelete}></ListItems>
+              }
             </table>
+            {this.state.loading &&
+
+              <div className="ms-3 spinner-border spinner-border-sm" role="status">
+                <span className="sr-only"></span>
+              </div>
+
+            }
+            {this.state.receipts.length === 0 && !this.state.loading && <div>
+              <p>Emty data</p>
+            </div>
+            }
           </div>
         </div>
       </div>

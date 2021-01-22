@@ -152,8 +152,7 @@ class Product extends Component {
       let form_value = order_form.form_value;
       form_value[name] = value;
       if (form_value["product"] == "1" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 500000;
-      if (form_value["product"] == "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 250000;
-      console.log(order_form);
+      if (form_value["product"] == "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 250000;      
       return { order_form: order_form };
     });
   }
@@ -256,8 +255,8 @@ class Product extends Component {
                 {!this.state.order_form.sending &&
                   <span >{this.state.order_form.update_mode ? "Lưu thay đổi" : "Xuất"}</span>
                 }
-                {this.state.order_form.sending && <div class="ms-3 spinner-border spinner-border-sm" role="status">
-                  <span class="sr-only"></span>
+                {this.state.order_form.sending && <div className="ms-3 spinner-border spinner-border-sm" role="status">
+                  <span className="sr-only"></span>
                 </div>}
               </button>
             </div>
@@ -304,8 +303,8 @@ class Product extends Component {
             </table>
             {this.state.loading &&
 
-              <div class="ms-3 spinner-border spinner-border-sm" role="status">
-                <span class="sr-only"></span>
+              <div className="ms-3 spinner-border spinner-border-sm" role="status">
+                <span className="sr-only"></span>
               </div>
 
             }
