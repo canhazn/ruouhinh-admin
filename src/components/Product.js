@@ -90,8 +90,7 @@ class Product extends Component {
         count: res.data.count,
         orders: res.data.results,
         next: res.data.next,
-        previou: res.data.previou,
-        orders: res.data.results,
+        previou: res.data.previou,        
         loading: false,
       })
     })
