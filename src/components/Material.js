@@ -129,7 +129,7 @@ class Rice extends Component {
 
       form_value[name] = value;
       console.log(form_value);
-      if (form_value["material"] == "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 25000;
+      if (form_value["material"]==="2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 25000;
       return { receipt_form: receipt_form };
     });
   }
