@@ -17,6 +17,7 @@ function login(email, password) {
         email: email,
         password: password,
     }).then((res) => {
+        console.log(res)
         localStorage.setItem('access_token', res.data.access);
         localStorage.setItem('refresh_token', res.data.refresh);
 

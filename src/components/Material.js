@@ -1,4 +1,4 @@
-import React, { useState, Component } from 'react';
+import React, { Component } from 'react';
 import { config } from '../Constant';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';

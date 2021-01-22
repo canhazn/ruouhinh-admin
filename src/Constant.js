@@ -1,5 +1,5 @@
 const prod = {
-    API_URL: 'https://cuu-ho-oto.appspot.com/api'
+    API_URL: 'https://www.ruouhinh.com/api'
 };
 
 const dev = {
