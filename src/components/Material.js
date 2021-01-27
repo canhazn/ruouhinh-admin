@@ -18,7 +18,7 @@ const initForm = {
 
 
 function ListItems(props) {
-  let { receipts, onDelete, onUpdate } = props;
+  let { receipts, onDelete, onUpdate, loading } = props;
 
   if (!receipts) return (
     <tbody></tbody>
@@ -31,7 +31,7 @@ function ListItems(props) {
         <td className="text-center"><Moment format="DD-MM-YYYY">{receipt.date_created}</Moment></td>
         <td className="text-center d-none d-md-block">{receipt.quantity} {String(receipt.material) === "1" ? "bao" : "cân"}</td>
         <td className="text-center"><NumberFormat value={receipt.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
-        <td className="text-center">
+        <td className="text-center custom-hidden">
           <span className="cursor-pointer mx-3" onClick={() => onUpdate(receipt)}>
             <Pen className=""></Pen>
           </span>
@@ -44,9 +44,35 @@ function ListItems(props) {
   });
 
   return (
-    <tbody>
-      {listReceipts}
-    </tbody>
+    <div className="table-responsive-md">
+      <table className="table align-middle table-striped table-hover table-bordered">
+        <thead>
+          <tr>
+            <th scope="col" className="text-center">Loại</th>
+            <th scope="col" className="text-center">Ngày</th>
+            <th scope="col" className="text-center d-none d-md-block">Số lượng</th>
+            <th scope="col" className="text-center">Tổng tiền</th>
+            <th scope="col" className="text-center custom-hidden">Tùy chọn</th>
+          </tr>
+        </thead>
+        {!loading &&
+          <tbody>
+            {listReceipts}
+          </tbody>
+        }
+      </table>
+      {loading &&
+
+        <div className="ms-3 spinner-border spinner-border-sm" role="status">
+          <span className="sr-only"></span>
+        </div>
+
+      }
+      {receipts.length === 0 && !loading && <div>
+        <p>Emty data</p>
+      </div>
+      }
+    </div>
   )
 }
 
@@ -79,9 +105,8 @@ class Rice extends Component {
   getList() {
     this.setState({ loading: true });
     const url = `${config.API_URL}/receipt/`;
-    axiosInstance.get(url).then(res => {
-      console.log(res)
-      this.setState({ receipts: res.data.results, loading: false })
+    axiosInstance.get(url).then(res => {      
+      this.setState({ receipts: res.data, loading: false })
     })
   }
 
@@ -129,7 +154,7 @@ class Rice extends Component {
 
       form_value[name] = value;
       console.log(form_value);
-      if (String(form_value["material"]) ==="2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 25000;
+      if (String(form_value["material"]) === "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 25000;
       return { receipt_form: receipt_form };
     });
   }
@@ -240,35 +265,9 @@ class Rice extends Component {
 
         {/* datatable  */}
         <div className="col-md-8">
-          <div className="table-responsive-md">
-            <table className="table align-middle table-striped table-hover table-bordered">
-              <thead>
-                <tr>
-                  <th scope="col" className="text-center">Loại</th>
-                  <th scope="col" className="text-center">Ngày</th>
-                  <th scope="col" className="text-center d-none d-md-block">Số lượng</th>
-                  <th scope="col" className="text-center">Tổng tiền</th>
-                  <th scope="col" className="text-center">Tùy chọn</th>
-                </tr>
-              </thead>
-              {!this.state.loading &&
-                <ListItems receipts={this.state.receipts} onUpdate={this.onUpdate} onDelete={this.onDelete}></ListItems>
-              }
-            </table>
-            {this.state.loading &&
-
-              <div className="ms-3 spinner-border spinner-border-sm" role="status">
-                <span className="sr-only"></span>
-              </div>
-
-            }
-            {this.state.receipts.length === 0 && !this.state.loading && <div>
-              <p>Emty data</p>
-            </div>
-            }
-          </div>
+          <ListItems receipts={this.state.receipts} onUpdate={this.onUpdate} onDelete={this.onDelete}  loading={this.state.loading}></ListItems>
         </div>
-      </div>
+      </div >
     )
   }
 }

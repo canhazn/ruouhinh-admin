@@ -18,7 +18,7 @@ const initForm = {
 };
 
 function ListItems(props) {
-  let { orders, onDelete, onUpdate } = props;
+  let { orders, onDelete, onUpdate, loading } = props;
   if (!orders) return (
     <tbody></tbody>
   )
@@ -32,7 +32,7 @@ function ListItems(props) {
         <td className="text-center custom-hidden">{item.completed ? ".." : "nợ"}</td>
         <td className="text-center custom-hidden">{item.quantity}</td>
         <td className="text-center custom-hidden">{item.note ? item.note : ".."}</td>
-        <td className="text-center">
+        <td className="text-center custom-hidden">
           <span className="cursor-pointer mx-3" onClick={() => onUpdate(item)}>
             <Pen className=""></Pen>
           </span>
@@ -45,9 +45,37 @@ function ListItems(props) {
   });
 
   return (
-    <tbody>
-      {listorders}
-    </tbody>
+    <div className="table-responsive-md">
+      <table className="table table-striped align-middle table-hover table-bordered">
+        <thead>
+          <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col" className="text-center">Ngày</th>
+            <th scope="col" className="text-center ">Tổng tiền</th>
+            <th scope="col" className="text-center">Khách hàng</th>
+            <th scope="col" className="text-center custom-hidden">Loại</th>
+            <th scope="col" className="text-center custom-hidden">...</th>
+            <th scope="col" className="text-center custom-hidden">Số can</th>
+            <th scope="col" className="text-center custom-hidden">Ghi chú</th>
+            <th scope="col" className="text-center custom-hidden">Tùy chọn</th>
+          </tr>
+        </thead>
+        {!loading &&
+          <tbody>
+            {listorders}
+          </tbody>
+        }
+      </table>
+      {loading &&
+        <div className="ms-3 spinner-border spinner-border-sm" role="status">
+          <span className="sr-only"></span>
+        </div>
+      }
+      {orders.length === 0 && !loading && <div>
+        <p>Emty data</p>
+      </div>
+      }
+    </div>
   )
 }
 
@@ -87,10 +115,7 @@ class Product extends Component {
 
     axiosInstance.get(url).then(res => {
       this.setState({
-        count: res.data.count,
-        orders: res.data.results,
-        next: res.data.next,
-        previou: res.data.previou,
+        orders: res.data,
         loading: false,
       })
     })
@@ -265,55 +290,12 @@ class Product extends Component {
 
         <div className="col-md-8">
           <div className="row navbar filter">
-
-            {/* limmit */}
-            {/* <div className="col-2 mb-3">
-              <label htmlFor="limmit">limmit:</label>
-              <select className="form-select" name="limmit" value={this.state.filter.limmit} onChange={this.handleFilter} >
-                <option value="5">5</option>
-                <option value="10">10</option>
-              </select>
-            </div> */}
-
-            {/* Text search */}
             <div className="col-6 mr-0">
               <label htmlFor="search">Tìm kiếm:</label>
               <input type="text" className="form-control mb-3" placeholder="Tìm kiếm" name="search" value={this.state.filter.search} onChange={this.handleFilter} />
             </div>
-
           </div>
-          <div className="table-responsive-md">
-            <table className="table table-striped align-middle table-hover table-bordered">
-              <thead>
-                <tr>
-                  {/* <th scope="col">#</th> */}
-                  <th scope="col" className="text-center">Ngày</th>
-                  <th scope="col" className="text-center ">Tổng tiền</th>
-                  <th scope="col" className="text-center">Khách hàng</th>
-                  <th scope="col" className="text-center custom-hidden">Loại</th>
-                  <th scope="col" className="text-center custom-hidden">...</th>
-                  <th scope="col" className="text-center custom-hidden">Số can</th>
-                  <th scope="col" className="text-center custom-hidden">Ghi chú</th>
-                  <th scope="col" className="text-center">Tùy chọn</th>
-                </tr>
-              </thead>
-              {!this.state.loading &&
-                <ListItems orders={this.state.orders} onUpdate={this.onUpdate} onDelete={this.onDelete}></ListItems>
-              }
-            </table>
-            {this.state.loading &&
-
-              <div className="ms-3 spinner-border spinner-border-sm" role="status">
-                <span className="sr-only"></span>
-              </div>
-
-            }
-            {this.state.orders.length === 0 && !this.state.loading && <div>
-              <p>Emty data</p>
-            </div>
-            }
-          </div>
-
+          <ListItems orders={this.state.orders} onUpdate={this.onUpdate} onDelete={this.onDelete} loading={this.state.loading}></ListItems>
         </div>
       </div>
     )
