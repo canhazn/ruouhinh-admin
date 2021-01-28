@@ -168,7 +168,7 @@ class Rice extends Component {
     if (window.confirm('Xác nhận xóa?')) {
       this.setState({ receipt_form: { ...this.state.receipt_form, deleting: true } });
 
-      const url = `${config.API_URL}/receipt/${id}`;
+      const url = `${config.API_URL}/receipt/${id}/`;
       axiosInstance.delete(url).then(data => {
         this.setState({
           receipt_form: {

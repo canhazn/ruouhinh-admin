@@ -192,7 +192,7 @@ class Product extends Component {
     if (window.confirm('Xác nhận xóa?')) {
       this.setState({ order_form: { ...this.state.order_form, deleting: true } });
 
-      const url = `${config.API_URL}/order/${id}`;
+      const url = `${config.API_URL}/order/${id}/`;
       axiosInstance.delete(url).then(data => {
 
         this.setState({
