@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { useHistory,  useLocation, matchPath } from 'react-router-dom';
+import { useHistory, useLocation, matchPath } from 'react-router-dom';
 import { authService } from './Auth/authService';
 import { Link } from 'react-router-dom';
 
 export default function TopNav(props) {
     const history = useHistory();
     const [loading, updateLoading] = useState(false)
+    const [user, setUser] = useState({ factory_name: "Home" })
+
+    // let name = JSON.parse(authService.getUser()).factory_name;
+    // if (name) setUser({factory_name: name})
 
     const isLoginMatch = !!matchPath(
         useLocation().pathname,
@@ -18,13 +22,14 @@ export default function TopNav(props) {
         authService.logout().then(res => {
             history.push('/');
             updateLoading(false);
+            setUser({ factory_name: "Home"})
         })
     };
 
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container">
-                <Link className="navbar-brand" to="/xuat/">Home</Link>
+                <Link className="navbar-brand" to="/xuat/">{user.factory_name}</Link>
                 <div className="mr-0" id="navbarNav">
                     <Link className="nav-link d-inline-block text-primary" to="/xuat/">Xuất</Link>
                     <Link className="nav-link d-inline-block text-primary" to="/material/">Nhập</Link>

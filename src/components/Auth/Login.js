@@ -23,8 +23,7 @@ export default function Login() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(formData);
-
+        
         if (!formData.email || !formData.password) return;
         updateLoading(true);
 
