@@ -3,15 +3,15 @@ import { config } from './Constant'
 
 
 const axiosInstance = axios.create({
-    baseURL: config.API_URL,
-    timeout: 5000,
-    headers: {
-        Authorization: localStorage.getItem('access_token')
-            ? 'JWT ' + localStorage.getItem('access_token')
-            : null,
-        'Content-Type': 'application/json',		
+	baseURL: config.API_URL,
+	timeout: 15000,
+	headers: {
+		Authorization: localStorage.getItem('access_token')
+			? 'JWT ' + localStorage.getItem('access_token')
+			: null,
+		'Content-Type': 'application/json',
 		accept: 'application/json',
-    },
+	},
 });
 
 
@@ -21,12 +21,12 @@ axiosInstance.interceptors.response.use(
 	},
 	async function (error) {
 		const originalRequest = error.config;
-        const baseURL = config.API_URL;
+		const baseURL = config.API_URL;
 		if (typeof error.response === 'undefined') {
 			alert(
 				'A server/network error occurred. ' +
-					'Looks like CORS might be the problem. ' +
-					'Sorry about this - we will get it fixed shortly.'
+				'Looks like CORS might be the problem. ' +
+				'Sorry about this - we will get it fixed shortly.'
 			);
 			return Promise.reject(error);
 		}
@@ -39,11 +39,7 @@ axiosInstance.interceptors.response.use(
 			return Promise.reject(error);
 		}
 
-		if (
-			error.response.data.code === 'token_not_valid' &&
-			error.response.status === 401 &&
-			error.response.statusText === 'Unauthorized'
-		) {
+		if (error.response.status === 401) {
 			const refreshToken = localStorage.getItem('refresh_token');
 
 			if (refreshToken) {
