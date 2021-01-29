@@ -13,7 +13,8 @@ import { Wallet } from "react-bootstrap-icons"
 const initForm = {
   quantity: "",
   total_cost: "",
-  material: "1", // rice material id = 1
+  completed: true,
+  material: "1", // rice material id = 1  
   id: ""
 };
 
@@ -36,6 +37,17 @@ function ReceiptForm(props) {
       {/* Giá */}
       <div className="mb-3">
         <NumberFormatCustom className="form-control" placeholder="Giá" name="total_cost" value={receipt_form.form_value.total_cost} onChange={handleChange} thousandSeparator={true} suffix={' đ'} required />
+      </div>
+
+       {/* Ghi chú */}
+       <div className="mb-3">
+        <input type="text" className="form-control mb-3" placeholder="Ghi chú" name="note" value={receipt_form.form_value.note} onChange={handleChange} />
+      </div>
+
+      {/* Đã trả */}
+      <div className="mb-3">
+        <label htmlFor="completed">Đã thanh toán: </label>
+        <input id="completed" name="completed" type="checkbox" className="mx-2" checked={receipt_form.form_value.completed} onChange={handleChange} />
       </div>
 
       {/* Submit btn */}
@@ -76,19 +88,12 @@ function ListItems(props) {
 
   let listReceipts = receipts.map((receipt, index) => {
     return (
-      <tr key={receipt.id} className=" cursor-pointer" onClick={() => onUpdate(receipt)} data-bs-toggle="modal" data-bs-target="#form_modal">
+      <tr key={receipt.id} className={(!receipt.completed && "bg-warning") + " cursor-pointer"} onClick={() => onUpdate(receipt)} data-bs-toggle="modal" data-bs-target="#form_modal">
         <td className="text-center"><Moment format="DD/M/YY">{receipt.date_created}</Moment></td>
         <th className="text-center"> {String(receipt.material) === "1" ? "Gạo" : "Men"}</th>
         <td className="text-center d-none d-md-block">{receipt.quantity} {String(receipt.material) === "1" ? "bao" : "cân"}</td>
         <td className="text-center"><NumberFormat value={receipt.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
-        {/* <td className="text-center custom-hidden">
-          <span className="cursor-pointer mx-3" onClick={() => onUpdate(receipt)}>
-            <Pen className=""></Pen>
-          </span>
-          <span className="cursor-pointer" onClick={() => onDelete(receipt.id)}>
-            <Trash></Trash>
-          </span>
-        </td> */}
+        <td className="text-center custom-hidden">{receipt.note ? receipt.note : ".."}</td>        
       </tr>
     )
   });
@@ -102,6 +107,7 @@ function ListItems(props) {
             <th scope="col" className="text-center">Loại</th>
             <th scope="col" className="text-center d-none d-md-block">Số lượng</th>
             <th scope="col" className="text-center">Tổng tiền</th>
+            <th scope="col" className="text-center custom-hidden">Ghi chú</th>
           </tr>
         </thead>
         {!loading &&
@@ -225,10 +231,10 @@ class Rice extends Component {
   }
 
   handleChange(event) {
-    const { name, value } = event.target
-    // const target = event.target;
-    // const value = target.value;
-    // const name = target.name;
+    // const { name, value } = event.target
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
 
     // update form data to state
     this.setState((prevState) => {

@@ -98,15 +98,7 @@ function ListItems(props) {
         <td className="text-center custom-hidden">{String(item.product) === "1" ? "20 lít" : "10 lít"}</td>
         {/* <td className="text-center custom-hidden">{item.completed ? ".." : "nợ"}</td> */}
         <td className="text-center custom-hidden">{item.quantity}</td>
-        <td className="text-center custom-hidden">{item.note ? item.note : ".."}</td>
-        {/* <td className="text-center custom-hidden">
-          <span className="cursor-pointer mx-3" >
-            <Pen className=""></Pen>
-          </span>
-          <span className="cursor-pointer" onClick={() => onDelete(item.id)}>
-            <Trash></Trash>
-          </span> 
-        </td> */}
+        <td className="text-center custom-hidden">{item.note ? item.note : ".."}</td>        
       </tr>
     )
   });
