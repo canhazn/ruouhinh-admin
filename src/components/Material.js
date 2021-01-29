@@ -53,7 +53,7 @@ function ReceiptForm(props) {
           </div>
         }
 
-        <button type="submit" className="btn btn-primary flex-grow-1" disabled={String(receipt_form.form_value.quantity) === "" || String(receipt_form.form_value.total_cost) === ""}>
+        <button type="submit" className={(receipt_form.deleting ? "invisible" : "visible") + " btn btn-primary flex-grow-1"} disabled={String(receipt_form.form_value.quantity) === "" || String(receipt_form.form_value.total_cost) === ""}>
           {!receipt_form.sending &&
             <span >{receipt_form.update_mode ? "Lưu thay đổi" : "Nhập"}</span>
           }
@@ -148,12 +148,26 @@ class Rice extends Component {
       loading: true,
     }
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.onDelete = this.onDelete.bind(this);
+    this.onCreate = this.onCreate.bind(this);
     this.onUpdate = this.onUpdate.bind(this);
+    this.onDelete = this.onDelete.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChange = this.handleChange.bind(this);
     this.handleFilter = this.handleFilter.bind(this);
   }
+
+  handleFilter(event) {
+    const { name, value } = event.target;
+
+    this.setState((prevState) => {
+      let filter = { ...prevState.filter };
+      filter[name] = value ? value : "";
+      return { filter };
+    }, () => {
+      this.getList();
+    });
+  }
+
 
   getList() {
     this.hideFormModal();
@@ -163,6 +177,29 @@ class Rice extends Component {
       this.setState({ receipts: res.data, loading: false })
     })
   }
+
+  // on create -> reset form
+  onCreate() {
+    this.setState({
+      receipt_form: {
+        update_mode: false,
+        deleting: false,
+        form_value: { ...initForm }
+      }
+    })
+  }
+
+  // on update -> add field to form
+  onUpdate(receipt) {
+
+    this.setState((prevState) => {
+      let receipt_form = { ...prevState };
+      receipt_form.form_value = { ...receipt };
+      receipt_form.update_mode = true;
+      return { receipt_form: receipt_form };
+    });
+  }
+
 
   onDelete(id) {
     if (window.confirm('Xác nhận xóa?')) {
@@ -181,28 +218,6 @@ class Rice extends Component {
         this.getList();
       });
     }
-  }
-
-  handleFilter(event) {
-    const { name, value } = event.target;
-
-    this.setState((prevState) => {
-      let filter = { ...prevState.filter };
-      filter[name] = value ? value : "";
-      return { filter };
-    }, () => {
-      this.getList();
-    });
-  }
-
-  onUpdate(receipt) {
-
-    this.setState((prevState) => {
-      let receipt_form = { ...prevState };
-      receipt_form.form_value = { ...receipt };
-      receipt_form.update_mode = true;
-      return { receipt_form: receipt_form };
-    });
   }
 
   hideFormModal() {
@@ -350,7 +365,7 @@ class Rice extends Component {
         <div className="col-md-8 mt-3 mt-md-0">
           <div className="d-flex justify-content-between">
             <div className="">
-              <button className="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#form_modal">Thêm +</button>
+              <button className="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#form_modal" onClick={() => this.onCreate()}>Thêm +</button>
             </div>
             {/* <div className="">
               <select className="form-select" name="material" value={this.state.filter.material} onChange={this.handleFilter}>

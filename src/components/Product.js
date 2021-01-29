@@ -168,11 +168,12 @@ class Product extends Component {
       loading: true,
       id: ""
     }
-    this.handleFilter = this.handleFilter.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.onDelete = this.onDelete.bind(this);
+    this.onCreate = this.onCreate.bind(this);
     this.onUpdate = this.onUpdate.bind(this);
+    this.onDelete = this.onDelete.bind(this);
+    this.handleFilter = this.handleFilter.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   getList() {
@@ -186,6 +187,27 @@ class Product extends Component {
         loading: false,
       })
     })
+  }
+
+  // on create -> reset form
+  onCreate() {
+    this.setState({
+      order_form: {
+        update_mode: false,
+        deleting: false,
+        form_value: { ...initForm }
+      }
+    })
+  }
+
+  // on update -> add field to form
+  onUpdate(receipt) {
+    this.setState((prevState) => {
+      let order_form = { ...prevState };
+      order_form.form_value = { ...receipt };
+      order_form.update_mode = true;
+      return { order_form: order_form };
+    });
   }
 
   onDelete(id) {
@@ -205,15 +227,6 @@ class Product extends Component {
         this.getList();
       });
     }
-  }
-
-  onUpdate(receipt) {
-    this.setState((prevState) => {
-      let order_form = { ...prevState };
-      order_form.form_value = { ...receipt };
-      order_form.update_mode = true;
-      return { order_form: order_form };
-    });
   }
 
 
@@ -365,7 +378,7 @@ class Product extends Component {
         <div className="col-md-8 mt-md-0 mt-3">
           <div className="d-flex justify-content-between">
             <div className="">
-              <button className="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#form_modal">Thêm +</button>
+              <button className="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#form_modal" onClick={() => this.onCreate()}>Thêm +</button>
             </div>
             <div className="">
               <input type="text" className="form-control mb-3" placeholder="Khách hàng" name="search" value={this.state.filter.search} onChange={this.handleFilter} />
