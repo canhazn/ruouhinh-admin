@@ -158,6 +158,7 @@ class Product extends Component {
         deleting: false,
       },
       loading: true,
+      total_amount: 0,
       id: ""
     }
     this.onCreate = this.onCreate.bind(this);
@@ -173,10 +174,11 @@ class Product extends Component {
     this.setState({ loading: true });
     let url = `${config.API_URL}/order/?search=${this.state.filter.search}`;
 
-    axiosInstance.get(url).then(res => {
+    axiosInstance.get(url).then(res => res.data).then(res => {
       this.setState({
-        orders: res.data,
+        orders: res.result,
         loading: false,
+        total_amount: res.total_amount
       })
     })
   }
@@ -351,9 +353,7 @@ class Product extends Component {
                         Bán ra</div>
 
                       <div className="h5 mb-0 font-weight-bold text-gray-800">
-                        <NumberFormat value={
-                          this.state.orders.length && this.state.orders.map(order => order.total_cost).reduce((previousValue, currentValue) => previousValue + currentValue)
-                        } displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
+                        <NumberFormat value={this.state.total_amount} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
                       </div>
                     </div>
                     <div className="col-auto">
