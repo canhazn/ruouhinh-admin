@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory, useLocation, matchPath } from 'react-router-dom';
 import { authService } from './Auth/authService';
 import { Link } from 'react-router-dom';
@@ -8,8 +8,6 @@ export default function TopNav(props) {
     const [loading, updateLoading] = useState(false)
     const [user, setUser] = useState({ factory_name: "Home" })
 
-    // let name = JSON.parse(authService.getUser()).factory_name;
-    // if (name) setUser({factory_name: name})
 
     const isLoginMatch = !!matchPath(
         useLocation().pathname,
@@ -22,14 +20,19 @@ export default function TopNav(props) {
         authService.logout().then(res => {
             history.push('/');
             updateLoading(false);
-            setUser({ factory_name: "Home"})
+            // setUser({ factory_name: "Home"})
         })
     };
+
+    useEffect(() => {
+        let user = JSON.parse(authService.getUser());
+        if (user) setUser({ factory_name: user.factory_name })
+    }, [!isLoginMatch])
 
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container">
-                <Link className="navbar-brand" to="/xuat/">{user.factory_name}</Link>
+                <Link className="navbar-brand" to="/xuat/">{isLoginMatch ? "Home" : user.factory_name}</Link>
                 <div className="mr-0" id="navbarNav">
                     <Link className="nav-link d-inline-block text-primary" to="/xuat/">Xuất</Link>
                     <Link className="nav-link d-inline-block text-primary" to="/material/">Nhập</Link>
