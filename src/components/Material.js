@@ -39,8 +39,8 @@ function ReceiptForm(props) {
         <NumberFormatCustom className="form-control" placeholder="Giá" name="total_cost" value={receipt_form.form_value.total_cost} onChange={handleChange} thousandSeparator={true} suffix={' đ'} required />
       </div>
 
-       {/* Ghi chú */}
-       <div className="mb-3">
+      {/* Ghi chú */}
+      <div className="mb-3">
         <input type="text" className="form-control mb-3" placeholder="Ghi chú" name="note" value={receipt_form.form_value.note} onChange={handleChange} />
       </div>
 
@@ -93,7 +93,7 @@ function ListItems(props) {
         <th className="text-center"> {String(receipt.material) === "1" ? "Gạo" : "Men"}</th>
         <td className="text-center d-none d-md-block">{receipt.quantity} {String(receipt.material) === "1" ? "bao" : "cân"}</td>
         <td className="text-center"><NumberFormat value={receipt.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
-        <td className="text-center custom-hidden">{receipt.note ? receipt.note : ".."}</td>        
+        <td className="text-center custom-hidden">{receipt.note ? receipt.note : ".."}</td>
       </tr>
     )
   });
@@ -151,6 +151,8 @@ class Rice extends Component {
         update_mode: false,
         sending: false,
       },
+      total_amount_rice: 0,
+      total_amount_yeast: 0,
       loading: true,
     }
 
@@ -179,8 +181,13 @@ class Rice extends Component {
     this.hideFormModal();
     this.setState({ loading: true });
     const url = `${config.API_URL}/receipt/?material=${this.state.filter.material}`;
-    axiosInstance.get(url).then(res => {
-      this.setState({ receipts: res.data, loading: false })
+    axiosInstance.get(url).then(res => res.data).then(res => {
+      this.setState({
+        receipts: res.result,
+        total_amount_rice: res.total_amount_rice,
+        total_amount_yeast: res.total_amount_yeast,
+        loading: false
+      })
     })
   }
 
@@ -314,9 +321,7 @@ class Rice extends Component {
                         Gạo</div>
 
                       <div className="h5 mb-0 font-weight-bold text-gray-800">
-                        <NumberFormat value={
-                          this.state.receipts.length && this.state.receipts.filter(receipt => receipt.material === 1).map(receipt => receipt.total_cost).reduce((previousValue, currentValue) => previousValue + currentValue, 0)
-                        } displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
+                        <NumberFormat value={this.state.total_amount_rice} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
                       </div>
                     </div>
                     <div className="col-auto">
@@ -337,9 +342,7 @@ class Rice extends Component {
                         Men</div>
 
                       <div className="h5 mb-0 font-weight-bold text-gray-800">
-                        <NumberFormat value={
-                          this.state.receipts.length && this.state.receipts.filter(receipt => receipt.material === 2).map(receipt => receipt.total_cost).reduce((previousValue, currentValue) => previousValue + currentValue, 0)
-                        } displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
+                        <NumberFormat value={this.state.total_amount_yeast} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
                       </div>
                     </div>
                     <div className="col-auto">
@@ -373,13 +376,13 @@ class Rice extends Component {
             <div className="">
               <button className="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#form_modal" onClick={() => this.onCreate()}>Thêm +</button>
             </div>
-            {/* <div className="">
+            <div className="">
               <select className="form-select" name="material" value={this.state.filter.material} onChange={this.handleFilter}>
                 <option value="">---</option>
                 <option value="1">Gạo</option>
                 <option value="2">Men</option>
               </select>
-            </div> */}
+            </div>
           </div>
 
           <div className="">
