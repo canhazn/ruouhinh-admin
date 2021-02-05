@@ -15,7 +15,8 @@ const initForm = {
   total_cost: "",
   completed: true,
   material: "1", // rice material id = 1  
-  id: ""
+  note: "",
+  id: "",
 };
 
 
@@ -32,7 +33,7 @@ function ReceiptForm(props) {
 
       {/* Số bao */}
       <div className="mb-3">
-        <input type="number" className="form-control" placeholder={String(receipt_form.form_value.material) === "1" ? "Số bao" : "Số cân"} name="quantity" value={receipt_form.form_value.quantity} onChange={handleChange} required />
+        <input type="number" className="form-control" placeholder="Số cân" name="quantity" value={receipt_form.form_value.quantity} onChange={handleChange} required />
       </div>
       {/* Giá */}
       <div className="mb-3">
@@ -91,7 +92,7 @@ function ListItems(props) {
       <tr key={receipt.id} className={(!receipt.completed && "bg-warning") + " cursor-pointer"} onClick={() => onUpdate(receipt)} data-bs-toggle="modal" data-bs-target="#form_modal">
         <td className="text-center"><Moment format="DD/M/YY">{receipt.date_created}</Moment></td>
         <th className="text-center"> {String(receipt.material) === "1" ? "Gạo" : "Men"}</th>
-        <td className="text-center d-none d-md-block">{receipt.quantity} {String(receipt.material) === "1" ? "bao" : "cân"}</td>
+        <td className="text-center d-none d-md-block">{receipt.quantity} cân</td>
         <td className="text-center"><NumberFormat value={receipt.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
         <td className="text-center custom-hidden">{receipt.note ? receipt.note : ".."}</td>
       </tr>
@@ -124,7 +125,7 @@ function ListItems(props) {
         </div>
       }
       {receipts.length === 0 && !loading && <div className="row text-center">
-        <p>Emty data</p>
+        <p>Chưa có dữ liệu</p>
       </div>
       }
     </div>
@@ -184,8 +185,8 @@ class Rice extends Component {
     axiosInstance.get(url).then(res => res.data).then(res => {
       this.setState({
         receipts: res.result,
-        total_amount_rice: res.total_amount_rice,
-        total_amount_yeast: res.total_amount_yeast,
+        total_amount_rice: res.total_amount_rice ? res.total_amount_rice : 0,
+        total_amount_yeast: res.total_amount_yeast ? res.total_amount_yeast : 0,
         loading: false
       })
     })
@@ -249,7 +250,8 @@ class Rice extends Component {
       let form_value = receipt_form.form_value;
 
       form_value[name] = value;
-      if (String(form_value["material"]) === "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 25000;
+      if (String(form_value["material"]) === "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 30000;
+      if (String(form_value["material"]) === "1" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 11000;
       return { receipt_form: receipt_form };
     });
   }
@@ -317,12 +319,21 @@ class Rice extends Component {
                 <div className="card-body">
                   <div className="row no-gutters align-items-center">
                     <div className="col mr-2">
-                      <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                        Gạo</div>
+                      <div className="text-xs font-weight-bold text-primary mb-1">
+                        Tổng gạo đã nhập</div>
+                      {this.state.loading &&
+                        <div className="text-center">
+                          <div className="ms-3 spinner-border spinner-border-sm" role="status">
+                            <span className="sr-only"></span>
+                          </div>
+                        </div>
+                      }
 
-                      <div className="h5 mb-0 font-weight-bold text-gray-800">
-                        <NumberFormat value={this.state.total_amount_rice} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
-                      </div>
+                      {!this.state.loading &&
+                        <div className="h5 mb-0 font-weight-bold text-gray-800">
+                          <NumberFormat value={this.state.total_amount_rice} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
+                        </div>
+                      }
                     </div>
                     <div className="col-auto">
                       <Wallet width="32" height="32"></Wallet>
@@ -338,12 +349,21 @@ class Rice extends Component {
                 <div className="card-body">
                   <div className="row no-gutters align-items-center">
                     <div className="col mr-2">
-                      <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                        Men</div>
+                      <div className="text-xs font-weight-bold text-primary mb-1">
+                        Tổng men đã nhập</div>
+                      {this.state.loading &&
+                        <div className="text-center">
+                          <div className="ms-3 spinner-border spinner-border-sm" role="status">
+                            <span className="sr-only"></span>
+                          </div>
+                        </div>
+                      }
 
-                      <div className="h5 mb-0 font-weight-bold text-gray-800">
-                        <NumberFormat value={this.state.total_amount_yeast} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
-                      </div>
+                      {!this.state.loading &&
+                        <div className="h5 mb-0 font-weight-bold text-gray-800">
+                          <NumberFormat value={this.state.total_amount_yeast} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
+                        </div>
+                      }
                     </div>
                     <div className="col-auto">
                       <Wallet width="32" height="32"></Wallet>

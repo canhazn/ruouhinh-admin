@@ -13,7 +13,6 @@ const initForm = {
   quantity: "",
   total_cost: "",
   customer_name: "",
-  product: "1", // rice material id = 1
   completed: true,
   note: ""
 };
@@ -22,14 +21,6 @@ function OrderForm(props) {
   let { order_form, handleChange, handleSubmit, onDelete } = props;
   return (
     <form onSubmit={handleSubmit}>
-      {/* Loai ruou */}
-      <div className="form-group mb-3">
-        <select className="form-select" name="product" value={order_form.form_value.product} onChange={handleChange} >
-          <option value="1">Can 20 lit</option>
-          <option value="2">Can 10 lit</option>
-        </select>
-      </div>
-
       {/* Customer */}
       <div className="mb-3">
         <input type="text" className="form-control mb-3" placeholder="Khách hàng" name="customer_name" value={order_form.form_value.customer_name} onChange={handleChange} required />
@@ -37,7 +28,7 @@ function OrderForm(props) {
 
       {/* Số can */}
       <div className="mb-3">
-        <input type="number" className="form-control mb-3" placeholder="Số can" name="quantity" value={order_form.form_value.quantity} onChange={handleChange} required />
+        <input type="number" className="form-control mb-3" placeholder="Số lít" name="quantity" value={order_form.form_value.quantity} onChange={handleChange} required />
       </div>
 
       {/* Giá */}
@@ -95,10 +86,8 @@ function ListItems(props) {
         <td className="text-center"><Moment format="DD/M/YY">{item.date_created}</Moment></td>
         <td className="text-center"><NumberFormat value={item.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
         <td className="text-center">{item.customer_name}</td>
-        <td className="text-center custom-hidden">{String(item.product) === "1" ? "20 lít" : "10 lít"}</td>
-        {/* <td className="text-center custom-hidden">{item.completed ? ".." : "nợ"}</td> */}
-        <td className="text-center custom-hidden">{item.quantity}</td>
-        <td className="text-center custom-hidden">{item.note ? item.note : ".."}</td>        
+        <td className="text-center custom-hidden">{item.quantity} lít</td>
+        <td className="text-center custom-hidden">{item.note ? item.note : ".."}</td>
       </tr>
     )
   });
@@ -111,8 +100,8 @@ function ListItems(props) {
             <th scope="col" className="text-center">Ngày</th>
             <th scope="col" className="text-center ">Tổng tiền</th>
             <th scope="col" className="text-center">Khách hàng</th>
-            <th scope="col" className="text-center custom-hidden">Loại</th>
-            <th scope="col" className="text-center custom-hidden">Số can</th>
+            <th scope="col" className="text-center custom-hidden">Số lít</th>
+            {/* <th scope="col" className="text-center custom-hidden">Số can</th> */}
             <th scope="col" className="text-center custom-hidden">Ghi chú</th>
           </tr>
         </thead>
@@ -130,7 +119,7 @@ function ListItems(props) {
         </div>
       }
       {orders.length === 0 && !loading && <div className="row text-center">
-        <p>Emty data</p>
+        <p>Chưa có dữ liệu</p>
       </div>
       }
     </div>
@@ -148,7 +137,8 @@ class Product extends Component {
       previou: null,
       filter: {
         limmit: "",
-        search: ""
+        search: "",
+        completed: ""
       },
       orders: [],
       order_form: {
@@ -159,6 +149,7 @@ class Product extends Component {
       },
       loading: true,
       total_amount: 0,
+      total_cash: 0,
       id: ""
     }
     this.onCreate = this.onCreate.bind(this);
@@ -172,13 +163,14 @@ class Product extends Component {
   getList() {
     this.hideFormModal();
     this.setState({ loading: true });
-    let url = `${config.API_URL}/order/?search=${this.state.filter.search}`;
+    let url = `${config.API_URL}/order/?search=${this.state.filter.search}&completed=${this.state.filter.completed}`;
 
     axiosInstance.get(url).then(res => res.data).then(res => {
       this.setState({
         orders: res.result,
         loading: false,
-        total_amount: res.total_amount
+        total_amount: res.total_amount ? res.total_amount : 0,
+        total_cash: res.total_cash ? res.total_cash : 0
       })
     })
   }
@@ -247,8 +239,8 @@ class Product extends Component {
       let order_form = { ...prevState.order_form };
       let form_value = order_form.form_value;
       form_value[name] = value;
-      if (String(form_value["product"]) === "1" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 500000;
-      if (String(form_value["product"]) === "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 250000;
+      if (name === "quantity") form_value["total_cost"] = form_value["quantity"] * 25000;
+
       return { order_form: order_form };
     });
   }
@@ -328,33 +320,29 @@ class Product extends Component {
           {/* things */}
 
           <div className="row">
-            {/* <div className="col-12">
+            {/* nex tings */}
+            <div className="col-12 mt-3">
               <div className="card border-left-primary  h-100 py-2">
                 <div className="card-body">
                   <div className="row no-gutters align-items-center">
                     <div className="col mr-2">
-                      <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                        Earnings (Monthly)</div>
-                      <div className="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
-                    </div>
-                    <div className="col-auto">
-                      <CartCheckFill width="32" height="32"></CartCheckFill>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div> */}
-            <div className="col-12">
-              <div className="card border-left-primary  h-100 py-2">
-                <div className="card-body">
-                  <div className="row no-gutters align-items-center">
-                    <div className="col mr-2">
-                      <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                        Bán ra</div>
+                      <div className="text-xs font-weight-bold text-primary mb-1">
+                        Tiền rượu đã thu</div>
+                      {this.state.loading &&
+                        <div className="text-center">
+                          <div className="ms-3 spinner-border spinner-border-sm" role="status">
+                            <span className="sr-only"></span>
+                          </div>
+                        </div>
+                      }
 
-                      <div className="h5 mb-0 font-weight-bold text-gray-800">
-                        <NumberFormat value={this.state.total_amount} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
-                      </div>
+                      {!this.state.loading &&
+                        <div className="h5 mb-0 font-weight-bold text-gray-800">
+                          <NumberFormat className={this.state.total_cash === this.state.total_amount ? "text-success" : "text-warning"} value={this.state.total_cash} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix="" />
+                          <span className="mx-1">/</span>
+                          <NumberFormat className={this.state.total_cash === this.state.total_amount ? "text-success" : "text-primary"} value={this.state.total_amount} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
+                        </div>
+                      }
                     </div>
                     <div className="col-auto">
                       <Wallet width="32" height="32"></Wallet>
@@ -372,8 +360,17 @@ class Product extends Component {
             <div className="">
               <button className="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#form_modal" onClick={() => this.onCreate()}>Thêm +</button>
             </div>
-            <div className="">
-              <input type="text" className="form-control mb-3" placeholder="Khách hàng" name="search" value={this.state.filter.search} onChange={this.handleFilter} />
+            <div className="row">
+              <div className="col px-0">
+                <input type="text" className="form-control mb-3 " placeholder="Khách hàng" name="search" value={this.state.filter.search} onChange={this.handleFilter} />
+
+              </div>
+              <div className="col-auto">
+                <select className="form-select  " name="completed" value={this.state.filter.completed} onChange={this.handleFilter}>
+                  <option value="">---</option>
+                  <option value="False">Nợ</option>
+                </select>
+              </div>
             </div>
           </div>
           <div className="">
