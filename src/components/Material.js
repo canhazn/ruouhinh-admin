@@ -321,19 +321,9 @@ class Rice extends Component {
                     <div className="col mr-2">
                       <div className="text-xs font-weight-bold text-primary mb-1">
                         Tổng gạo đã nhập</div>
-                      {this.state.loading &&
-                        <div className="text-center">
-                          <div className="ms-3 spinner-border spinner-border-sm" role="status">
-                            <span className="sr-only"></span>
-                          </div>
-                        </div>
-                      }
-
-                      {!this.state.loading &&
-                        <div className="h5 mb-0 font-weight-bold text-gray-800">
-                          <NumberFormat value={this.state.total_amount_rice} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
-                        </div>
-                      }
+                      <div className="h5 mb-0 font-weight-bold text-gray-800">
+                        <NumberFormat value={this.state.total_amount_rice} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
+                      </div>
                     </div>
                     <div className="col-auto">
                       <Wallet width="32" height="32"></Wallet>

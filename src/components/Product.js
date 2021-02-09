@@ -328,21 +328,11 @@ class Product extends Component {
                     <div className="col mr-2">
                       <div className="text-xs font-weight-bold text-primary mb-1">
                         Tiền rượu đã thu</div>
-                      {this.state.loading &&
-                        <div className="text-center">
-                          <div className="ms-3 spinner-border spinner-border-sm" role="status">
-                            <span className="sr-only"></span>
-                          </div>
-                        </div>
-                      }
-
-                      {!this.state.loading &&
-                        <div className="h5 mb-0 font-weight-bold text-gray-800">
-                          <NumberFormat className={this.state.total_cash === this.state.total_amount ? "text-success" : "text-warning"} value={this.state.total_cash} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix="" />
-                          <span className="mx-1">/</span>
-                          <NumberFormat className={this.state.total_cash === this.state.total_amount ? "text-success" : "text-primary"} value={this.state.total_amount} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
-                        </div>
-                      }
+                      <div className="h5 mb-0 font-weight-bold text-gray-800">
+                        <NumberFormat className={this.state.total_cash === this.state.total_amount ? "text-success" : "text-warning"} value={this.state.total_cash} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix="" />
+                        <span className="mx-1">/</span>
+                        <NumberFormat className={this.state.total_cash === this.state.total_amount ? "text-success" : "text-primary"} value={this.state.total_amount} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
+                      </div>
                     </div>
                     <div className="col-auto">
                       <Wallet width="32" height="32"></Wallet>
@@ -356,15 +346,15 @@ class Product extends Component {
         </div>
 
         <div className="col-md-8 mt-md-0 mt-3">
-          <div className="d-flex justify-content-between">
-            <div className="">
+          <div className="navbar">
+            <div className="col-auto">
               <button className="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#form_modal" onClick={() => this.onCreate()}>Thêm +</button>
             </div>
-            <div className="row">
-              <div className="col px-0">
+            <div className="row g-2 d-flex justify-content-">
+              <div className="col-auto">
                 <input type="text" className="form-control mb-3 " placeholder="Khách hàng" name="search" value={this.state.filter.search} onChange={this.handleFilter} />
-
               </div>
+
               <div className="col-auto">
                 <select className="form-select  " name="completed" value={this.state.filter.completed} onChange={this.handleFilter}>
                   <option value="">---</option>
