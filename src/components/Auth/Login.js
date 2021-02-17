@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { authService } from './authService';
 
@@ -32,6 +32,11 @@ export default function Login() {
             updateLoading(false);
         })
     };
+
+    useEffect(() => {
+        let user = JSON.parse(authService.getUser());
+        if (user)  history.push('/');
+    }, []) 
 
     return (
         <div>
