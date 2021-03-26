@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory, useLocation, matchPath } from 'react-router-dom';
-import { authService } from './Auth/authService';
+import { authService } from '../services/authService';
 import { Link } from 'react-router-dom';
 
 export default function TopNav(props) {
@@ -25,21 +25,22 @@ export default function TopNav(props) {
     };
 
     useEffect(() => {
-        let user = JSON.parse(authService.getUser());
-        if (user) setUser({ factory_name: user.factory_name })
+        authService.getFactoryName().then(res => {            
+            setUser({ factory_name: res.factory_name })
+        })
     }, [!isLoginMatch,]) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container">
-                <Link className="navbar-brand" to="/xuat/">{isLoginMatch ? "Home" : user.factory_name}</Link>
+                <Link className="navbar-brand" to="/">{user.factory_name}</Link>
                 <div className="mr-0" id="navbarNav">
-                    <Link className="nav-link d-inline-block text-primary" to="/xuat/">Xuất</Link>
-                    <Link className="nav-link d-inline-block text-primary" to="/material/">Nhập</Link>
+                    <Link className="nav-link d-inline-block text-primary" to="/ban/">Bán</Link>
+                    <Link className="nav-link d-inline-block text-primary" to="/nhap/">Nhập</Link>
                     {!isLoginMatch &&
                         <div className="nav-link d-inline-block text-primary cursor-pointer" onClick={onLogout} >
-                            <span >Đăng xuất</span>
-                            {loading &&
+                            
+                            {!loading ? <span >Đăng xuất</span> :
                                 <div className="ms-2 spinner-border spinner-border-sm" role="status">
                                     <span className="sr-only"></span>
                                 </div>

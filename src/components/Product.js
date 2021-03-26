@@ -4,10 +4,9 @@ import React, { Component } from 'react';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
 import NumberFormatCustom from "./NumberFormatCustom";
-import { config } from '../Constant';
-import axiosInstance from "../Axios";
 import { Wallet } from "react-bootstrap-icons"
-// import $ from 'jquery';
+
+import { orderService } from "services/orderService"
 
 const initForm = {
   quantity: "",
@@ -84,7 +83,7 @@ function ListItems(props) {
     return (
       <tr key={item.id} className={(!item.completed && "bg-warning") + " cursor-pointer"} onClick={() => onUpdate(item)} data-bs-toggle="modal" data-bs-target="#form_modal">
         <td className="text-center"><Moment format="DD/M/YY">{item.date_created}</Moment></td>
-        <td className="text-center"><NumberFormat value={item.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
+        <td className="text-center"><NumberFormat value={item.total_cost} displayType={'text'} thousandSeparator={'.'} decimalSeparator="," suffix=" đ" /></td>
         <td className="text-center">{item.customer_name}</td>
         <td className="text-center custom-hidden">{item.quantity} lít</td>
         <td className="text-center custom-hidden">{item.note ? item.note : ".."}</td>
@@ -119,13 +118,12 @@ function ListItems(props) {
         </div>
       }
       {orders.length === 0 && !loading && <div className="row text-center">
-        <p>Chưa có dữ liệu</p>
+        <p>Không có dữ liệu</p>
       </div>
       }
     </div>
   )
 }
-
 
 class Product extends Component {
   constructor(props) {
@@ -133,8 +131,6 @@ class Product extends Component {
 
     this.state = {
       count: 0,
-      next: `${config.API_URL}/order/`,
-      previou: null,
       filter: {
         limmit: "",
         search: "",
@@ -163,9 +159,7 @@ class Product extends Component {
   getList() {
     this.hideFormModal();
     this.setState({ loading: true });
-    let url = `${config.API_URL}/order/?search=${this.state.filter.search}&completed=${this.state.filter.completed}`;
-
-    axiosInstance.get(url).then(res => res.data).then(res => {
+    orderService.getList(this.state.filter.search, this.state.filter.completed).then(res => {
       this.setState({
         orders: res.result,
         loading: false,
@@ -200,12 +194,9 @@ class Product extends Component {
     if (window.confirm('Xác nhận xóa?')) {
       this.setState({ order_form: { ...this.state.order_form, deleting: true } });
 
-      const url = `${config.API_URL}/order/${id}/`;
-      axiosInstance.delete(url).then(data => {
-
+      orderService.deleteOrder(id).then(data => {
         this.setState({
           order_form: {
-            update_mode: false,
             deleting: false,
             form_value: { ...initForm }
           }
@@ -253,16 +244,13 @@ class Product extends Component {
     event.preventDefault();
 
     this.setState({ order_form: { ...this.state.order_form, sending: true } });
-
-    const url = `${config.API_URL}/order/`;
+    let order_id = this.state.order_form.form_value.id;
     let value = JSON.stringify(this.state.order_form.form_value);
 
 
     if (this.state.order_form.update_mode) {
       // Update item
-      axiosInstance.put(`${config.API_URL}/order/${this.state.order_form.form_value.id}/`, value).then(data => {
-
-
+      orderService.updateOrder(order_id, value).then(data => {
         this.getList();
         this.setState({
           order_form: {
@@ -274,8 +262,7 @@ class Product extends Component {
       });
     } else {
       // Create item
-      axiosInstance.post(url, value).then(data => {
-
+      orderService.createOrder(value).then(data => {
         this.getList();
         this.setState({
           order_form: {
@@ -298,7 +285,7 @@ class Product extends Component {
       <div className="row mt-3">
         <div className="col-md-4">
 
-          <legend>Xuất</legend>
+          <legend>Bán</legend>
           <hr />
 
           {/* form_modal */}
@@ -321,7 +308,7 @@ class Product extends Component {
 
           <div className="row">
             {/* nex tings */}
-            <div className="col-12 mt-3">
+            <div className="col-12">
               <div className="card border-left-primary  h-100 py-2">
                 <div className="card-body">
                   <div className="row no-gutters align-items-center">
@@ -329,9 +316,9 @@ class Product extends Component {
                       <div className="text-xs font-weight-bold text-primary mb-1">
                         Tiền rượu đã thu</div>
                       <div className="h5 mb-0 font-weight-bold text-gray-800">
-                        <NumberFormat className={this.state.total_cash === this.state.total_amount ? "text-success" : "text-warning"} value={this.state.total_cash} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix="" />
+                        <NumberFormat className={this.state.total_cash === this.state.total_amount ? "text-success" : "text-warning"} value={this.state.total_cash} displayType={'text'} thousandSeparator={'.'} decimalSeparator="," suffix="" />
                         <span className="mx-1">/</span>
-                        <NumberFormat className={this.state.total_cash === this.state.total_amount ? "text-success" : "text-primary"} value={this.state.total_amount} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
+                        <NumberFormat className={this.state.total_cash === this.state.total_amount ? "text-success" : "text-primary"} value={this.state.total_amount} displayType={'text'} thousandSeparator={'.'} decimalSeparator="," suffix=" đ" />
                       </div>
                     </div>
                     <div className="col-auto">
@@ -346,21 +333,21 @@ class Product extends Component {
         </div>
 
         <div className="col-md-8 mt-md-0 mt-3">
-          <div className="navbar">
-            <div className="col-auto">
-              <button className="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#form_modal" onClick={() => this.onCreate()}>Thêm +</button>
-            </div>
-            <div className="row g-2 d-flex justify-content-">
-              <div className="col-auto">
-                <input type="text" className="form-control mb-3 " placeholder="Khách hàng" name="search" value={this.state.filter.search} onChange={this.handleFilter} />
-              </div>
+          <div className="navbar d-flex justify-content-between align-items-baseline">
 
-              <div className="col-auto">
-                <select className="form-select  " name="completed" value={this.state.filter.completed} onChange={this.handleFilter}>
-                  <option value="">---</option>
-                  <option value="False">Nợ</option>
-                </select>
-              </div>
+            <button className="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#form_modal" onClick={() => this.onCreate()}>Thêm +</button>
+
+            <div className="flex-grow-1">
+            </div>
+            <div className="w-50 me-3">
+              <input type="text" className="form-control mb-3 " placeholder="Khách hàng" name="search" value={this.state.filter.search} onChange={this.handleFilter} />
+            </div>
+
+            <div className="col-auto">
+              <select className="form-select  " name="completed" value={this.state.filter.completed} onChange={this.handleFilter}>
+                <option value="">---</option>
+                <option value="False">Nợ</option>
+              </select>
             </div>
           </div>
           <div className="">

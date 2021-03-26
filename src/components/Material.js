@@ -1,14 +1,12 @@
 /*jslint eqeq: true*/
 
 import React, { Component } from 'react';
-import { config } from '../Constant';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
 import NumberFormatCustom from "./NumberFormatCustom";
-import axiosInstance from "../Axios";
-
 import { Wallet } from "react-bootstrap-icons"
 
+import { receiptService } from "services/receiptService"
 
 const initForm = {
   quantity: "",
@@ -93,7 +91,7 @@ function ListItems(props) {
         <td className="text-center"><Moment format="DD/M/YY">{receipt.date_created}</Moment></td>
         <th className="text-center"> {String(receipt.material) === "1" ? "Gạo" : "Men"}</th>
         <td className="text-center d-none d-md-block">{receipt.quantity} cân</td>
-        <td className="text-center"><NumberFormat value={receipt.total_cost} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" /></td>
+        <td className="text-center"><NumberFormat value={receipt.total_cost} displayType={'text'} thousandSeparator={'.'} decimalSeparator="," suffix=" đ" /></td>
         <td className="text-center custom-hidden">{receipt.note ? receipt.note : ".."}</td>
       </tr>
     )
@@ -125,7 +123,7 @@ function ListItems(props) {
         </div>
       }
       {receipts.length === 0 && !loading && <div className="row text-center">
-        <p>Chưa có dữ liệu</p>
+        <p>Không có dữ liệu</p>
       </div>
       }
     </div>
@@ -181,8 +179,8 @@ class Rice extends Component {
   getList() {
     this.hideFormModal();
     this.setState({ loading: true });
-    const url = `${config.API_URL}/receipt/?material=${this.state.filter.material}`;
-    axiosInstance.get(url).then(res => res.data).then(res => {
+
+    receiptService.getList(this.state.filter.material).then(res => {
       this.setState({
         receipts: res.result,
         total_amount_rice: res.total_amount_rice ? res.total_amount_rice : 0,
@@ -219,8 +217,7 @@ class Rice extends Component {
     if (window.confirm('Xác nhận xóa?')) {
       this.setState({ receipt_form: { ...this.state.receipt_form, deleting: true } });
 
-      const url = `${config.API_URL}/receipt/${id}/`;
-      axiosInstance.delete(url).then(data => {
+      receiptService.deleteReceipt(id).then(data => {
         this.setState({
           receipt_form: {
             update_mode: false,
@@ -266,13 +263,12 @@ class Rice extends Component {
       return;
     }
 
-    const url = `${config.API_URL}/receipt/`;
+    let receipt_id = this.state.receipt_form.form_value.id;
     let value = JSON.stringify(this.state.receipt_form.form_value);
 
     if (this.state.receipt_form.update_mode) {
       // Update item
-      axiosInstance.put(`${config.API_URL}/receipt/${this.state.receipt_form.form_value.id}/`, value).then(data => {
-
+      receiptService.updateReceipt(receipt_id, value).then(data => {
         this.getList();
 
         this.setState({
@@ -285,7 +281,7 @@ class Rice extends Component {
       });
     } else {
       // Create item
-      axiosInstance.post(url, value).then(data => {
+      receiptService.createReceipt(value).then(data => {
         this.setState({
           receipt_form: {
             update_mode: false,
@@ -322,7 +318,7 @@ class Rice extends Component {
                       <div className="text-xs font-weight-bold text-primary mb-1">
                         Tổng gạo đã nhập</div>
                       <div className="h5 mb-0 font-weight-bold text-gray-800">
-                        <NumberFormat value={this.state.total_amount_rice} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
+                        <NumberFormat value={this.state.total_amount_rice} displayType={'text'} thousandSeparator={'.'} decimalSeparator="," suffix=" đ" />
                       </div>
                     </div>
                     <div className="col-auto">
@@ -342,7 +338,7 @@ class Rice extends Component {
                       <div className="text-xs font-weight-bold text-primary mb-1">
                         Tổng men đã nhập</div>
                       <div className="h5 mb-0 font-weight-bold text-gray-800">
-                        <NumberFormat value={this.state.total_amount_yeast} displayType={'text'} thousandSeparator={true} decimalSeparator="." suffix=" đ" />
+                        <NumberFormat value={this.state.total_amount_yeast} displayType={'text'} thousandSeparator={'.'} decimalSeparator="," suffix=" đ" />
                       </div>
                     </div>
                     <div className="col-auto">

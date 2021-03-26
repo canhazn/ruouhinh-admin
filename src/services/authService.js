@@ -1,10 +1,12 @@
-import axiosInstance from '../../Axios';
+import axiosInstance from './Axios';
+import { config } from './Constant';
 
 export const authService = {
     login,
     logout,
     isAuthenticated,
     getUser,
+    getFactoryName,
 }
 
 function isAuthenticated() {
@@ -15,6 +17,11 @@ function isAuthenticated() {
 function getUser() {
     let user = localStorage.getItem('user');
     return user;
+}
+
+function getFactoryName() {
+    let url = `${config.API_URL}/get_factory_name/`;
+    return axiosInstance.get(url).then(res => res.data);
 }
 
 
