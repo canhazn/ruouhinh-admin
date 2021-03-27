@@ -25,10 +25,11 @@ export default function TopNav(props) {
     };
 
     useEffect(() => {
+        if (isLoginMatch) return;
         authService.getFactoryName().then(res => {
             setUser({ factory_name: res.factory_name })
         })
-    }, [!isLoginMatch,]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [!isLoginMatch]) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">

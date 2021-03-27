@@ -1,37 +1,18 @@
 import axios from 'axios';
 import { config } from './Constant'
-// import { useAuthTokenInterceptor } from 'axios-jwt';
-
-
-
-// const axiosInstance = axios.create();
-
-// const requestRefresh = (refresh) => {
-// 	return new Promise((resolve, reject) => {
-
-// 		axios.post(`${config.API_URL}/token/refresh/`, {
-// 			refresh
-// 		})
-// 			.then(response => {
-// 				resolve(response.data.accessToken);
-// 			}, reject);
-// 	});
-// };
-
-// useAuthTokenInterceptor(axiosInstance, { requestRefresh });  // Notice that this uses the apiClient instance.  <-- important
 
 
 const axiosInstance = axios.create({
 	baseURL: config.API_URL,
 	timeout: 15000,
 	headers: {
-		'Authorization': localStorage.getItem('access_token') ? 'JWT ' + localStorage.getItem('access_token') : null,
+		Authorization: localStorage.getItem('access_token')
+			? 'JWT ' + localStorage.getItem('access_token')
+			: null,
 		'Content-Type': 'application/json',
-		'accept': 'application/json',
+		accept: 'application/json',
 	},
 });
-
-
 
 
 axiosInstance.interceptors.response.use(
@@ -40,19 +21,20 @@ axiosInstance.interceptors.response.use(
 	},
 	async function (error) {
 		const originalRequest = error.config;
-
+		const baseURL = config.API_URL;
+		console.log(originalRequest);
 		if (typeof error.response === 'undefined') {
 			alert(
 				'A server/network error occurred. ' +
-					'Looks like CORS might be the problem. ' +
-					'Sorry about this - we will get it fixed shortly.'
+				'Looks like CORS might be the problem. ' +
+				'Sorry about this - we will get it fixed shortly.'
 			);
 			return Promise.reject(error);
 		}
 
 		if (
 			error.response.status === 401 &&
-			originalRequest.url === config.API_URL + 'token/refresh/'
+			originalRequest.url === '/token/refresh/'
 		) {
 			window.location.href = '/login/';
 			return Promise.reject(error);
@@ -101,6 +83,5 @@ axiosInstance.interceptors.response.use(
 		return Promise.reject(error);
 	}
 );
-
 
 export default axiosInstance;
