@@ -25,7 +25,7 @@ export default function TopNav(props) {
     };
 
     useEffect(() => {
-        authService.getFactoryName().then(res => {            
+        authService.getFactoryName().then(res => {
             setUser({ factory_name: res.factory_name })
         })
     }, [!isLoginMatch,]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -35,11 +35,12 @@ export default function TopNav(props) {
             <div className="container">
                 <Link className="navbar-brand" to="/">{user.factory_name}</Link>
                 <div className="mr-0" id="navbarNav">
+                    <Link className="nav-link d-inline-block text-primary" to="/kho/">Kho</Link>
                     <Link className="nav-link d-inline-block text-primary" to="/ban/">Bán</Link>
                     <Link className="nav-link d-inline-block text-primary" to="/nhap/">Nhập</Link>
                     {!isLoginMatch &&
                         <div className="nav-link d-inline-block text-primary cursor-pointer" onClick={onLogout} >
-                            
+
                             {!loading ? <span >Đăng xuất</span> :
                                 <div className="ms-2 spinner-border spinner-border-sm" role="status">
                                     <span className="sr-only"></span>

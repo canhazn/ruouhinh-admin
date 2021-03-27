@@ -5,6 +5,7 @@ import Material from "./Material";
 
 import LogDb from "./LogDb";
 import Home from "./Home";
+import Cargo from "./Cargo";
 
 export {
     TopNav,
@@ -12,5 +13,6 @@ export {
     Product,
     LogDb,
     Login, 
-    Home   
+    Home,
+    Cargo   
 };
