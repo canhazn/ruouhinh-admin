@@ -1,7 +1,7 @@
 import React, { Component, useState, useEffect } from 'react';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
-import NumberFormatCustom from "./NumberFormatCustom";
+// import NumberFormatCustom from "./NumberFormatCustom";
 import { orderService } from "services/orderService";
 import { receiptService } from "services/receiptService";
 import { notifyService } from "services/notifyService";
@@ -35,8 +35,6 @@ function OrderThing(props) {
 
     const [total_amount, updateTotalAmount] = useState("");
     const [total_receipt, updateTotalReceipt] = useState("");
-    const [array_index, updateArrayIndex] = useState([]);
-
 
     useEffect(() => {
 
@@ -126,10 +124,7 @@ function ListItems(props) {
 
 
 class Home extends Component {
-    constructor(props) {
-        super(props);
-    }
-
+ 
     render() {
         return (
             <div>

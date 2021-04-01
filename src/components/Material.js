@@ -1,12 +1,13 @@
 /*jslint eqeq: true*/
 
-import React, { Component } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
 import NumberFormatCustom from "./NumberFormatCustom";
 import { Wallet } from "react-bootstrap-icons"
 
 import { receiptService } from "services/receiptService"
+import { materialService } from "services/materialService"
 
 const initForm = {
   quantity: "",
@@ -20,12 +21,27 @@ const initForm = {
 
 function ReceiptForm(props) {
   let { receipt_form, handleChange, handleSubmit, onDelete } = props;
+
+  const [materials, setMaterials] = useState([]);
+
+  useEffect(() => {
+    materialService.getList().then(res => {
+      setMaterials(res.result)
+    })
+  }, []);
+
+  let selectMaterials = materials.map(material => {
+    return (
+      <option key={material.id} value={material.id}>{material.title}</option>
+    )
+  })
+
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="form-group mb-3">
         <select className="form-select" name="material" value={receipt_form.form_value.material} onChange={handleChange} >
-          <option value="1">Gạo</option>
-          <option value="2">Men</option>
+          {selectMaterials}
         </select>
       </div>
 
@@ -81,6 +97,17 @@ function ReceiptForm(props) {
 function ListItems(props) {
   let { receipts, onUpdate, loading } = props;
 
+  const [materials, setMaterials] = useState([]);
+
+  useEffect(() => {
+    materialService.getList().then(res => {
+
+      let listMaterial = []
+      res.result.map(material => (listMaterial[material.id] = material.titles))
+      setMaterials(listMaterial)
+    })
+  }, []);
+
   if (!receipts) return (
     <tbody></tbody>
   )
@@ -89,7 +116,7 @@ function ListItems(props) {
     return (
       <tr key={receipt.id} className={(!receipt.completed && "bg-warning") + " cursor-pointer"} onClick={() => onUpdate(receipt)} data-bs-toggle="modal" data-bs-target="#form_modal">
         <td className="text-center"><Moment format="DD/M/YY">{receipt.date_created}</Moment></td>
-        <th className="text-center"> {String(receipt.material) === "1" ? "Gạo" : "Men"}</th>
+        <th className="text-center"> {materials[receipt.material]}</th>
         <td className="text-center d-none d-md-block">{receipt.quantity} cân</td>
         <td className="text-center"><NumberFormat value={receipt.total_cost} displayType={'text'} thousandSeparator={'.'} decimalSeparator="," suffix=" đ" /></td>
         <td className="text-center custom-hidden">{receipt.note ? receipt.note : ".."}</td>
@@ -247,8 +274,8 @@ class Rice extends Component {
       let form_value = receipt_form.form_value;
 
       form_value[name] = value;
-      if (String(form_value["material"]) === "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 30000;
-      if (String(form_value["material"]) === "1" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 11000;
+      // if (String(form_value["material"]) === "2" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 30000;
+      // if (String(form_value["material"]) === "1" && name !== "total_cost") form_value["total_cost"] = form_value["quantity"] * 11000;
       return { receipt_form: receipt_form };
     });
   }

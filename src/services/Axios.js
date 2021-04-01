@@ -21,8 +21,9 @@ axiosInstance.interceptors.response.use(
 	},
 	async function (error) {
 		const originalRequest = error.config;
-		const baseURL = config.API_URL;
-		console.log(originalRequest);
+		// const baseURL = config.API_URL;
+		
+		// console.log(originalRequest);
 		if (typeof error.response === 'undefined') {
 			alert(
 				'A server/network error occurred. ' +

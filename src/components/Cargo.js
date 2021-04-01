@@ -3,7 +3,7 @@
 import React, { Component, useState, useEffect } from 'react';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
-import NumberFormatCustom from "./NumberFormatCustom";
+// import NumberFormatCustom from "./NumberFormatCustom";
 import { Wallet } from "react-bootstrap-icons"
 
 import { cargoService } from "services/cargoService"
@@ -90,9 +90,7 @@ function ListItems(props) {
   useEffect(() => {
     productService.getList().then(res => {
       let listProduct = []
-      res.result.map(product => {
-        listProduct[product.id] = product.title
-      })
+      res.result.map(product => (listProduct[product.id] = product.title))
       setProducts(listProduct)
     })
   }, [])
@@ -104,9 +102,10 @@ function ListItems(props) {
   let listCargos = cargos.map((cargo, index) => {
     return (
       <tr key={cargo.id} onClick={() => onUpdate(cargo)} data-bs-toggle="modal" data-bs-target="#form_modal">
-        <td className="text-center"><Moment format="DD/M/YY">{cargo.date_created}</Moment></td>
+        <td className="text-center"><Moment format="L">{cargo.date_created}</Moment></td>
         <th className="text-center"> {products[cargo.product]}</th>
-        <td className="text-center d-none d-md-block">{cargo.quantity} lít</td>
+        <td className="text-center custom-hidden">{cargo.quantity} lít</td>
+        <td className="text-center">{cargo.real_quantity} lít</td>
         <td className="text-center custom-hidden">{cargo.note ? cargo.note : ".."}</td>
       </tr>
     )
@@ -119,7 +118,8 @@ function ListItems(props) {
           <tr>
             <th scope="col" className="text-center">Ngày</th>
             <th scope="col" className="text-center">Loại</th>
-            <th scope="col" className="text-center d-none d-md-block">Số lượng</th>
+            <th scope="col" className="text-center custom-hidden">Số lượng</th>
+            <th scope="col" className="text-center">Thực tế</th>
             <th scope="col" className="text-center custom-hidden">Ghi chú</th>
           </tr>
         </thead>
@@ -153,7 +153,7 @@ function Square(props) {
     cargoService.getTotalOf(product_id).then(res => {
       setTotalAmount(res.total_amount)
     })
-  }, []);
+  }, [product_id]);
 
   return (
     <div className="col-12">
@@ -187,10 +187,10 @@ function SummaryBoxView(props) {
     })
   }, []);
 
-  let list_square = products.map(product => <Square title={product.title} product_id={product.id}></Square>)
+  let list_square = products.map(product => <Square key={product.id} title={product.title} product_id={product.id}></Square>)
 
   return (
-    <div className="row mt-3 g-3">      
+    <div className="row mt-3 g-3">
       {list_square}
     </div>
   )
@@ -369,7 +369,7 @@ class Rice extends Component {
         <div className="col-md-4">
           <legend>Kho</legend>
           <hr />
-            <SummaryBoxView></SummaryBoxView>
+          <SummaryBoxView></SummaryBoxView>
 
           {/* form_modal */}
           <div className="modal fade" id="form_modal" tabIndex="-1" aria-labelledby="form_modelLabel" aria-hidden="true">

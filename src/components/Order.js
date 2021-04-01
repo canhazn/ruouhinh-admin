@@ -1,15 +1,20 @@
 /*jslint eqeq: true*/
 
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
 import NumberFormatCustom from "./NumberFormatCustom";
 import { Wallet } from "react-bootstrap-icons"
 
 import { orderService } from "services/orderService"
+import { productService } from "services/productService"
+import { cargoService } from "services/cargoService"
+import moment from "moment";
 
 const initForm = {
+
   quantity: "",
+  cargo: {},
   total_cost: "",
   customer_name: "",
   completed: true,
@@ -18,8 +23,54 @@ const initForm = {
 
 function OrderForm(props) {
   let { order_form, handleChange, handleSubmit, onDelete } = props;
+
+  const [products, setProducts] = useState([]);
+  const [cargos, setCargos] = useState([]);
+
+  useEffect(() => {
+    productService.getList().then(res => setProducts(res.result))
+  }, []);
+
+  useEffect(() => {
+    let product_id = order_form.form_value.product ? order_form.form_value.product : 1;
+    cargoService.getListOf(product_id).then(res => setCargos(res.result));
+
+    // If update_mode set selected product_id
+    // else do nothing so default selected is first element
+    // if (order_form.update_mode) {
+    // setSelectedProduct(product_id);
+    // }
+  }, [order_form.form_value.product]);
+
+
+  let selectProducts = products.map(product => {
+    return (
+      <option key={product.id} value={product.id}>{product.title}</option>
+    )
+  })
+
+  let selectCargos = cargos.map(cargo => {
+    cargo.date_created = moment(cargo.date_created).format('L')
+    return (
+      <option key={cargo.id} value={cargo.id}>{cargo.quantity}_{cargo.real_quantity}_{cargo.date_created}</option>
+    )
+  })
+
   return (
     <form onSubmit={handleSubmit}>
+      <div className="mb-3">
+        <select className="form-select" name="product" value={order_form.form_value.product} onChange={handleChange} required>
+          {selectProducts}
+        </select>
+      </div>
+
+      <div className="mb-3">
+        <select className="form-select" name="cargo" value={order_form.form_value.cargo} onChange={handleChange} required>
+          <option value="">----</option>
+          {selectCargos}
+        </select>
+      </div>
+
       {/* Customer */}
       <div className="mb-3">
         <input type="text" className="form-control mb-3" placeholder="Khách hàng" name="customer_name" value={order_form.form_value.customer_name} onChange={handleChange} required />
@@ -61,7 +112,7 @@ function OrderForm(props) {
           </div>
         }
 
-        <button type="submit" className={(order_form.deleting ? "invisible" : "visible") + " btn btn-primary flex-grow-1"} disabled={order_form.form_value.quantity === "" || order_form.form_value.total_cost === ""}>
+        <button type="submit" className={(order_form.deleting ? "invisible" : "visible") + " btn btn-primary flex-grow-1"} disabled={order_form.disabled}>
           {!order_form.sending &&
             <span >{order_form.update_mode ? "Lưu thay đổi" : "Xuất"}</span>
           }
@@ -76,6 +127,18 @@ function OrderForm(props) {
 
 function ListItems(props) {
   let { orders, onUpdate, loading } = props;
+
+  const [products, setProducts] = useState([])
+
+  useEffect(() => {
+    productService.getList().then(res => {
+      let listProduct = []
+      res.result.map(product => listProduct[product.id] = product.title)
+      setProducts(listProduct)
+    })
+  }, [])
+
+
   if (!orders) return (
     <tbody></tbody>
   )
@@ -85,6 +148,7 @@ function ListItems(props) {
         <td className="text-center"><Moment format="DD/M/YY">{item.date_created}</Moment></td>
         <td className="text-center"><NumberFormat value={item.total_cost} displayType={'text'} thousandSeparator={'.'} decimalSeparator="," suffix=" đ" /></td>
         <td className="text-center">{item.customer_name}</td>
+        <th className="text-center custom-hidden"> {products[item.cargo.product]}</th>
         <td className="text-center custom-hidden">{item.quantity} lít</td>
         <td className="text-center custom-hidden">{item.note ? item.note : ".."}</td>
       </tr>
@@ -99,8 +163,8 @@ function ListItems(props) {
             <th scope="col" className="text-center">Ngày</th>
             <th scope="col" className="text-center ">Tổng tiền</th>
             <th scope="col" className="text-center">Khách hàng</th>
+            <th scope="col" className="text-center custom-hidden">Loại</th>
             <th scope="col" className="text-center custom-hidden">Số lít</th>
-            {/* <th scope="col" className="text-center custom-hidden">Số can</th> */}
             <th scope="col" className="text-center custom-hidden">Ghi chú</th>
           </tr>
         </thead>
@@ -142,6 +206,7 @@ class Product extends Component {
         update_mode: false,
         sending: false,
         deleting: false,
+        disabled: true
       },
       loading: true,
       total_amount: 0,
@@ -181,12 +246,20 @@ class Product extends Component {
   }
 
   // on update -> add field to form
-  onUpdate(receipt) {
+  onUpdate(order) {
     this.setState((prevState) => {
-      let order_form = { ...prevState };
-      order_form.form_value = { ...receipt };
+      // copy object so it prevent change original object
+      let order_form = { ...prevState.order_form };
+      let orderObject = { ...order };
+
+      // save cargo_id, product_id to parent object
+      orderObject.cargo = order.cargo.id;
+      orderObject.product = order.cargo.product;
+
+      // return order_form state
+      order_form.form_value = { ...orderObject };
       order_form.update_mode = true;
-      return { order_form: order_form };
+      return { order_form: order_form, };
     });
   }
 
@@ -220,7 +293,7 @@ class Product extends Component {
   }
 
   handleChange(event) {
-    // const { name, value } = event.target;
+    // const { name, value } = event.target;    
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
@@ -229,10 +302,12 @@ class Product extends Component {
     this.setState((prevState) => {
       let order_form = { ...prevState.order_form };
       let form_value = order_form.form_value;
+
+      // update form value(order_form)
       form_value[name] = value;
       if (name === "quantity") form_value["total_cost"] = form_value["quantity"] * 25000;
-
-      return { order_form: order_form };
+      order_form.disabled = false;
+      return { order_form: order_form, };
     });
   }
 

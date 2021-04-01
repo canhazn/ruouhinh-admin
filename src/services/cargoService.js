@@ -6,11 +6,17 @@ export const cargoService = {
     createCargo,
     deleteCargo,
     updateCargo,
-    getTotalOf
+    getTotalOf,
+    getListOf,
 }
 
 function getTotalOf(product_id) {
     const url = `${config.API_URL}/cargo/?get-total-of=${product_id}`;
+    return axiosInstance.get(url).then(res => res.data)
+}
+
+function getListOf(product_id) {
+    const url = `${config.API_URL}/cargo/?get-list-of=${product_id}`;
     return axiosInstance.get(url).then(res => res.data)
 }
 

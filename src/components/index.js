@@ -1,6 +1,6 @@
 import { Login } from "./Auth";
 import TopNav from './TopNav';
-import Product from './Product';
+import Order from './Order';
 import Material from "./Material";
 
 import LogDb from "./LogDb";
@@ -10,7 +10,7 @@ import Cargo from "./Cargo";
 export {
     TopNav,
     Material,
-    Product,
+    Order,
     LogDb,
     Login, 
     Home,

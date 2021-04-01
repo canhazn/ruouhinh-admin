@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Moment from 'react-moment';
-import NumberFormat from 'react-number-format';
-import NumberFormatCustom from "./NumberFormatCustom";
+// import NumberFormat from 'react-number-format';
+// import NumberFormatCustom from "./NumberFormatCustom";
 import { config } from '../services/Constant';
 import axiosInstance from "../services/Axios";
 
