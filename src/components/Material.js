@@ -103,7 +103,7 @@ function ListItems(props) {
     materialService.getList().then(res => {
 
       let listMaterial = []
-      res.result.map(material => (listMaterial[material.id] = material.titles))
+      res.result.map(material => (listMaterial[material.id] = material.title))
       setMaterials(listMaterial)
     })
   }, []);

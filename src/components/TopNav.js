@@ -32,26 +32,50 @@ export default function TopNav(props) {
     }, [!isLoginMatch]) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div className="container">
-                <Link className="navbar-brand" to="/">{user.factory_name}</Link>
-                <div className="mr-0" id="navbarNav">
-                    <Link className="nav-link d-inline-block text-primary" to="/kho/">Kho</Link>
-                    <Link className="nav-link d-inline-block text-primary" to="/ban/">Bán</Link>
-                    <Link className="nav-link d-inline-block text-primary" to="/nhap/">Nhập</Link>
-                    {!isLoginMatch &&
-                        <div className="nav-link d-inline-block text-primary cursor-pointer" onClick={onLogout} >
-
-                            {!loading ? <span >Đăng xuất</span> :
-                                <div className="ms-2 spinner-border spinner-border-sm" role="status">
-                                    <span className="sr-only"></span>
-                                </div>
-                            }
-                        </div>
-                    }
+        <div className="">
+            <nav className="navbar navbar-expand-lg navbar-dark bg-dark d-none d-md-block">
+                <div className="container">
+                    <Link className="navbar-brand" to="/">{user.factory_name}</Link>
+                    <div className="mr-0" id="navbarNav">
+                        <Link className="nav-link d-inline-block text-primary" to="/kho/">Kho</Link>
+                        <Link className="nav-link d-inline-block text-primary" to="/ban/">Bán</Link>
+                        <Link className="nav-link d-inline-block text-primary" to="/nhap/">Nhập</Link>
+                        {!isLoginMatch &&
+                            <div className="nav-link d-inline-block text-primary cursor-pointer" onClick={onLogout} >
+                                {!loading ? <span >Đăng xuất</span> :
+                                    <div className="ms-2 spinner-border spinner-border-sm" role="status">
+                                        <span className="sr-only"></span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
+            <nav className="navbar navbar-expand-lg navbar-dark bg-dark d-md-none d-block">
+                <div className="container">
+
+                    <div className="w-100 pb-2 border-bottom text-center d-md-none d-block">
+                        <Link className="navbar-brand m-auto" to="/">{user.factory_name}</Link>
+                    </div>
+
+                    <div className="d-flex justify-content-between w-100" id="navbarNav">
+                        <Link className="nav-link d-inline-block text-primary" to="/kho/">Kho</Link>
+                        <Link className="nav-link d-inline-block text-primary" to="/ban/">Bán</Link>
+                        <Link className="nav-link d-inline-block text-primary" to="/nhap/">Nhập</Link>
+                        {!isLoginMatch &&
+                            <div className="nav-link d-inline-block text-primary cursor-pointer" onClick={onLogout} >
+                                {!loading ? <span >Đăng xuất</span> :
+                                    <div className="ms-2 spinner-border spinner-border-sm" role="status">
+                                        <span className="sr-only"></span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </nav>
+        </div>
     );
 }
 
